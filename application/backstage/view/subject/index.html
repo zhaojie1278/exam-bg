@@ -1,0 +1,79 @@
+{extend name='main'}
+
+{block name="button"}
+
+{if auth("add")}
+<button data-open='{:url("add")}' data-title="添加试题" class='layui-btn layui-btn-sm layui-btn-primary'>添加试题</button>
+{/if}
+{if auth("batchadd")}
+<button data-open='{:url("batchadd")}' data-title="" class='layui-btn layui-btn-sm layui-btn-primary'>批量添加</button>
+{/if}
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='subject/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='text-left nowrap'>ID</th>
+            <th class='text-left nowrap'>试题分类</th>
+            <th class='text-left nowrap'>所属章节</th>
+            <th class='text-left' width="400">题目</th>
+            <th class='text-left nowrap'>难易程度</th>
+            <th class='text-left nowrap'>全站作答</th>
+            <th class='text-left nowrap'>创建时间</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'>
+            </td>
+            <td class="text-left nowrap">
+                <span class="font-w7">{$vo.id|default='-'}</span>
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.cname|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.chapter|default='-'}
+            </td>
+            <td class='text-left' width="400">
+                {$vo.question|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {if $vo.difficulty == 1}容易{elseif $vo.difficulty == 2}困难{else}-{/if}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.used|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.create_at|format_datetime}
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("edit")}
+                <a class="layui-btn layui-btn-sm" data-title="编辑题库信息" data-open='{:url("edit")}?id={$vo.id}'>编 辑</a>
+                {/if}
+
+                {if auth("remove")}
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除该题库吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
+                {/if}
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+        {/notempty}
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+
+{/block}

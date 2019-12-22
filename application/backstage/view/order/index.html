@@ -1,0 +1,96 @@
+{extend name='main'}
+
+{block name="button"}
+
+{if auth("add")}
+<button data-open='{:url("add")}' data-title="添加试题" class='layui-btn layui-btn-sm layui-btn-primary'>添加试题</button>
+{/if}
+{if auth("batchadd")}
+<button data-open='{:url("batchadd")}' data-title="" class='layui-btn layui-btn-sm layui-btn-primary'>批量添加</button>
+{/if}
+{/block}
+
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='order/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='text-left nowrap'>订单ID</th>
+            <th class='text-left nowrap'>用户昵称</th>
+            <th class='text-left nowrap'>订单号码</th>
+            <th class='text-left nowrap'>交易单号</th>
+            <th class='text-left nowrap'>商品价格</th>
+            <th class='text-left nowrap'>支付价格</th>
+            <th class='text-left nowrap'>订单状态</th>
+            <th class='text-left nowrap'>创建时间</th>
+            <th class='text-left nowrap'>支付时间</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'>
+            </td>
+            <td class="text-left nowrap">
+                {$vo.id|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.nickname|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.ordernum|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.tradeid|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                ￥{$vo.total_fee|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                <span class="font-w7">￥{$vo.pay_fee|default='-'}</span>
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.status_span|raw|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.create_at|format_datetime|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.buytime|format_datetime|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("remove")}
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="删除之后无法恢复，确定要删除该订单吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
+                {/if}
+            </td>
+        </tr>
+        {/foreach}
+        <tr style="background-color: #dddddd">
+            <td></td>
+            <td><span class="font-w7">总计</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><span class="font-w7">￥{$total_fee_all}</span></td>
+            <td><span class="font-w7">￥{$pay_fee_all}</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        </tbody>
+        {/notempty}
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+
+{/block}

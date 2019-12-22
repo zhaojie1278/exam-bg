@@ -1,0 +1,65 @@
+{extend name='main'}
+{block name="button"}
+{if auth("add")}
+<button data-open='{:url("add")}' data-title="自定义试卷" class='layui-btn layui-btn-sm layui-btn-primary'>组卷</button>
+{/if}
+{/block}
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='custom_paper/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='text-left nowrap'>ID</th>
+            <th class='text-left nowrap'>试卷名</th>
+            <th class='text-left nowrap'>试题科目</th>
+            <th class='text-left nowrap'>困难占比</th>
+            <th class='text-left nowrap'>题目数量</th>
+            <th class='text-left nowrap'>创建时间</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'>
+            </td>
+            <td class="text-left nowrap">
+                <span class="font-w7">{$vo.id|default='-'}</span>
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.title|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$category[$vo.cate_id]|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.diff_pre|default='0'}%
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.num|default='0'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.create_at|format_datetime}
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("info")}
+                <a class="layui-btn layui-btn-sm" data-title="信息" data-open='{:url("info")}?id={$vo.id}'>试卷内容</a>
+                {/if}
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+        {/notempty}
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+
+{/block}

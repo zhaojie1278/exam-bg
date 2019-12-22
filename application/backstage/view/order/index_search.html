@@ -1,0 +1,61 @@
+<fieldset>
+
+    <legend>条件搜索</legend>
+
+    <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">用户昵称</label>
+            <div class="layui-input-inline">
+                <input name="nickname" value="{$Think.get.nickname|default=''}" placeholder="请输入用户昵称" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">订单号码</label>
+            <div class="layui-input-inline">
+                <input name="ordernum" value="{$Think.get.ordernum|default=''}" placeholder="请输入订单号码" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">交易单号</label>
+            <div class="layui-input-inline">
+                <input name="tradeid" value="{$Think.get.tradeid|default=''}" placeholder="请输入交易单号" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">订单状态</label>
+            <div class="layui-input-inline">
+                <select class="layui-select" name="status" lay-search>
+                    <option value="">-- 全部 --</option>
+                    {foreach $status as $key=>$item}
+                    <option value="{$key}" {if $Think.get.status!=''}{$Think.get.status==$key?'selected':''}{/if}>{$item}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">创建时间</label>
+            <div class="layui-input-inline">
+                <input data-date-range name="create_at" value="{$Think.get.create_at|default=''}" placeholder="请选择创建时间" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">支付时间</label>
+            <div class="layui-input-inline">
+                <input data-date-range name="buytime" value="{$Think.get.buytime|default=''}" placeholder="请选择支付时间" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+        </div>
+    </form>
+
+</fieldset>
+
+<script>form.render()</script>

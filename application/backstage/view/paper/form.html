@@ -1,0 +1,62 @@
+
+{extend name='admin@main'}
+
+{block name="content"}
+<style>
+    .layui-table-cell{
+        height:auto;
+        overflow:visible;
+        text-overflow:inherit;
+        white-space:normal;
+    }
+</style>
+<div class="think-box-shadow">
+<table class="layui-table margin-top-10" lay-filter="demo">
+    <thead>
+    <tr>
+        <th lay-data="{field:'id', width:80, sort: true}">序号</th>
+        <th lay-data="{field:'cname', width:100}">试题分类</th>
+        <th lay-data="{field:'scene', width:200}">情景</th>
+        <th lay-data="{field:'question'}">题目</th>
+        <th lay-data="{field:'image', width:200}">配图</th>
+        <th lay-data="{field:'answer'}">选项</th>
+        <th lay-data="{field:'check_answer', width:120}">正确答案</th>
+        <th lay-data="{field:'u_answer', width:120}">用户答案</th>
+    </tr>
+    </thead>
+    <tbody>
+    {volist name="subject" id="vo"}
+    <tr>
+        <td>{$key+1}</td>
+        <td>{$vo.cname}</td>
+        <td>{$vo.scene|default='-'}</td>
+        <td>{$vo.question}</td>
+        <td><img src="{$vo.image}" height="100px" alt=""></td>
+        <td>
+            {volist name="vo.answer" id="voo"}
+                <p>{$voo.a}.{$voo.t}</p>
+            {/volist}
+        </td>
+        <td>{$vo.check_answer}</td>
+        <td><div style="width: 100%;height: 100px;line-height:100px;text-align:center;color:#fff; {if $vo.u_answer == $vo.check_answer}background-color:#009688;{else}background-color:#ff0000;{/if}
+        ">{$vo.u_answer}</div></td>
+    </tr>
+    {/volist}
+    </tbody>
+    <form action="">
+        <button class="layui-btn" onclick="window.history.back()">返回</button>
+    </form>
+</table>
+        </div>
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+
+        //转换静态表格
+        table.init('demo', {
+            page:true
+            ,limit: 10
+        });
+    })
+</script>
+{/block}

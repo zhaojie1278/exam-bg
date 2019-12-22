@@ -1,0 +1,176 @@
+{extend name='admin@main'}
+
+{block name="content"}
+
+{include file='backstage@subject/form_style'}
+
+<form onsubmit="return false;" id="Form" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">试题分类</span>
+                <select class="layui-select" required name="cid" id="">
+                    {foreach $class as $item}
+                    {if isset($vo.cid) and $vo.cid eq $item.id}
+                    <option selected value="{$item.id}">{$item.name}</option>
+                    {else}
+                    <option value="{$item.id}">{$item.name}</option>
+                    {/if}
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">题目</span>
+                <textarea placeholder="请输入题目" required class="layui-textarea" name="question">{$vo.question|default=""}</textarea>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">题目配图</span>
+                <span class="color-desc margin-left-5">非必填项</span>
+                <div>
+                    <input name="image" type="hidden" value="{$vo.image|default=''}">
+                    <script>$('[name="image"]').uploadOneImage()</script>
+                </div>
+            </label>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">所属章节</span>
+                <select class="layui-select" name="chapter_id" id="">
+                    <option value="">-- 请选择 --</option>
+                    {foreach $chapter as $item}
+                    {if isset($vo.chapter_id) and $vo.chapter_id eq $item.id}
+                    <option selected value="{$item.id}">{$item.spl}{$item.name}</option>
+                    {else}
+                    <option value="{$item.id}">{$item.spl}{$item.name}</option>
+                    {/if}
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">难易程度</span>
+                <select class="layui-select" name="difficulty" id="">
+                    <option value="">-- 请选择 --</option>
+                    {if isset($vo.difficulty) and $vo.difficulty eq 1}
+                    <option selected value="1">容易</option>
+                    {else}
+                    <option value="1">容易</option>
+                    {/if}
+                    {if isset($vo.difficulty) and $vo.difficulty eq 2}
+                    <option selected value="2">困难</option>
+                    {else}
+                    <option value="2">困难</option>
+                    {/if}
+                </select>
+            </label>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">情景</span>
+                <span class="color-desc margin-left-5">非必填项</span>
+                <textarea placeholder="请输入题目情景" class="layui-textarea" name="scene">{$vo.scene|default=""}</textarea>
+            </label>
+        </div>
+
+        <a class="layui-btn layui-btn-sm layui-btn-primary" ng-click="addOptionRow(option)">增加选项</a>
+        <div class="layui-form-item">
+            <table class="layui-table margin-top-10">
+                <thead>
+                <tr>
+                    <th width="20%" class="text-center nowrap">选项</th>
+                    <th width="50%" class="text-center nowrap">内容</th>
+                    <th width="20%" class="text-center nowrap">正确答案</th>
+                </tr>
+                </thead>
+                <tbody id="qusbox">
+                <tr ng-repeat="rows in specsTreeData track by $index">
+                    <td class="padding-0">
+                        <label class="padding-0 margin-0">
+                            <input class="layui-input border-0 padding-left-0 text-center" ng-model="rows.a">
+                        </label>
+                    </td>
+                    <td class="padding-0">
+                        <label class="padding-0 margin-0">
+                            <input class="layui-input border-0 padding-left-0 text-center" ng-model="rows.t">
+                        </label>
+                    </td>
+                    <td class="text-center layui-bg-gray">
+                        <label class="think-checkbox margin-0 full-width full-height block"><input lay-ignore type="checkbox" ng-model="rows.c"></label>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">答案解析</span>
+                <textarea placeholder="请输入解析" class="layui-textarea" name="analysis">{$vo.analysis|default=""}</textarea>
+            </label>
+        </div>
+        <div class="layui-form-item text-center">
+            {notempty name='vo.id'}<input type="hidden" name="id" value="{$vo.id}">{/notempty}
+            <button class="layui-btn layui-btn-danger" ng-click="historyBack()" type="button">取消编辑</button>
+            <button class="layui-btn" type="submit">保存</button>
+        </div>
+        <textarea class="layui-textarea layui-hide" name="answers">{{specsTreeData}}</textarea>
+
+
+    </div>
+</form>
+{/block}
+
+{block name='script'}
+<textarea class="layui-hide" id="answers">{$vo.answer|raw|default=''}</textarea>
+<script>
+    window.form.render();
+
+    require(['ckeditor', 'angular'], function () {
+        var app = angular.module("Form", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+        function callback($rootScope) {
+            $rootScope.option = JSON.parse(angular.element('#answers').val() ||'[{"a": "A","t": "","c":false },{"a": "B","t": "","c":false },{"a": "C","t": "","c":false },{"a": "D","t": "","c":false },{"a": "E","t": "","c":false }]');
+            $rootScope.historyBack = function () {
+                $.msg.confirm('确定要取消编辑吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+            // 增加整行规格分组
+            $rootScope.addOptionRow = function (data) {
+                //alert(1);
+                data.push({a: "",t: "",c:false })
+            };
+            $rootScope.$watch('option', function () {
+                var data = $rootScope.option, list = [];
+
+                list = data;
+                //TODO 填充选项
+
+
+                $rootScope.specsTreeData = list;
+            })
+            // 设置默认值
+            $rootScope.setValue = function (key, type, value, call) {
+                $rootScope.maps[key] || ($rootScope.maps[key] = {});
+                return $rootScope.maps[key][type] = eval(call.replace('_', "'" + value + "'"));
+            };
+            // 读取默认值
+            $rootScope.getValue = function (key, callback) {
+                if (typeof callback === 'function') {
+                    return callback($rootScope.maps[key] || {});
+                }
+                return {};
+            };
+        }
+    })
+
+</script>
+
+{/block}

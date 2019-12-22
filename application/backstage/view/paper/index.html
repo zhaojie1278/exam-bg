@@ -1,0 +1,80 @@
+{extend name='main'}
+{block name="content"}
+<div class="think-box-shadow">
+    {include file='paper/index_search'}
+    <table class="layui-table margin-top-10" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th class='list-table-check-td think-checkbox'>
+                <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
+            </th>
+            <th class='text-left nowrap'>ID</th>
+            <th class='text-left nowrap'>用户昵称</th>
+            <th class='text-left nowrap'>考试类型</th>
+            <th class='text-left nowrap'>试题数</th>
+            <th class='text-left nowrap'>正确率</th>
+            <th class='text-left nowrap'>得分</th>
+            <th class='text-left nowrap'>答题时间</th>
+            <th class='text-left nowrap'>考试时间</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr data-dbclick>
+            <td class='list-table-check-td think-checkbox'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'>
+            </td>
+            <td class="text-left nowrap">
+                <span class="font-w7">{$vo.id|default='-'}</span>
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.nickname|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$otype[$vo.otype]|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.sub_id|count|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.right_pre|default='0'}%
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.score|default='0'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.time|default='0'}s
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.create_at|format_datetime}
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("edit")}
+                <a class="layui-btn layui-btn-sm" data-title="信息" data-open='{:url("edit")}?id={$vo.id}'>详 情</a>
+                {/if}
+            </td>
+        </tr>
+        {/foreach}
+        <tr style="background-color: #dddddd">
+            <td></td>
+            <td><span class="font-w7">平均</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><span class="font-w7">{$avg_right_pre}%</span></td>
+            <td><span class="font-w7">{$avg_score}</span></td>
+            <td><span class="font-w7">{$avg_time}s</span></td>
+            <td></td>
+            <td></td>
+        </tr>
+        </tbody>
+        {/notempty}
+    </table>
+
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+
+{/block}

@@ -1,0 +1,51 @@
+{extend name='admin@main'}
+
+{block name="content"}
+
+
+<form onsubmit="return false;" id="Form" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">排序</span>
+                <input type="number" name="sort" value='{$vo.sort|default="0"}' placeholder="数字越大越靠前" class="layui-input">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">banner图</span>
+                <div>
+                    <input name="image" type="hidden" value="{$vo.image|default=''}">
+                    <script>$('[name="image"]').uploadOneImage()</script>
+                </div>
+            </label>
+        </div>
+
+        <div class="layui-form-item text-center">
+            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消</button>
+            <button class="layui-btn" type="submit">提交</button>
+        </div>
+
+    </div>
+</form>
+{/block}
+
+{block name='script'}
+<script>
+    window.form.render();
+
+    require(['ckeditor', 'angular'], function () {
+        var app = angular.module("Form", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+        function callback($rootScope) {
+            $rootScope.hsitoryBack = function () {
+                $.msg.confirm('确定要取消吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+
+        }
+    })
+</script>
+
+{/block}

@@ -1,0 +1,68 @@
+{extend name='admin@main'}
+
+{block name="content"}
+
+
+<form onsubmit="return false;" id="Form" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">试卷名</span>
+                <input name="title" value='{$vo.title|default=""}' required pattern="^.{2,}$" placeholder="请输入试卷名" class="layui-input">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">选择科目</span>
+                <select class="layui-select" required name="cate_id" id="">
+                    {foreach $category as $key=>$item}
+                    {if isset($vo.cate_id) and $vo.cate_id eq $key}
+                    <option selected value="{$key}">{$item}</option>
+                    {else}
+                    <option value="{$key}">{$item}</option>
+                    {/if}
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">困难占比(%)</span>
+                <input name="diff_pre" value='{$vo.diff_pre|default="0"}' placeholder="请输入困难程度" class="layui-input">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">题目数量</span>
+                <input name="num" value='{$vo.num|default="120"}' placeholder="请输入题目数量" class="layui-input">
+            </label>
+        </div>
+
+        <div class="layui-form-item text-center">
+            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消</button>
+            <button class="layui-btn" type="submit">生成</button>
+        </div>
+
+    </div>
+</form>
+{/block}
+
+{block name='script'}
+<script>
+    window.form.render();
+
+    require(['ckeditor', 'angular'], function () {
+        var app = angular.module("Form", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+        function callback($rootScope) {
+            $rootScope.hsitoryBack = function () {
+                $.msg.confirm('确定要取消吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+
+        }
+    })
+</script>
+
+{/block}
