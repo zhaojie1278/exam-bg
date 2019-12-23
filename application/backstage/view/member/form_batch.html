@@ -1,0 +1,70 @@
+{extend name='admin@main'}
+
+{block name="content"}
+
+
+<form onsubmit="return false;" id="Form" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">班级</span>
+                <select class="layui-select" required name="class_id" id="">
+                    {foreach $memberclass as $item}
+                    <option value="{$item.id}">{$item.name}</option>
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">Excel文件</span>
+                <div>
+                    <input name="excel" value="" type="hidden">
+                    <button data-file="btn" data-safe="true" data-type="xlsx,xls" data-field="excel" type="button" class="layui-btn layui-btn-primary">
+                        <i class="layui-icon layui-icon-vercode font-s14"></i> 上传Excel文件
+                    </button>
+                </div>
+            </label>
+        </div>
+
+        <div class="layui-form-item text-center">
+            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消</button>
+            <button class="layui-btn" type="submit">导入</button>
+        </div>
+
+    </div>
+</form>
+{/block}
+
+{block name='script'}
+<textarea class="layui-hide" id="answers">{$vo.answer|raw|default=''}</textarea>
+<script>
+    window.form.render();
+    $(function(){
+        $('input[name="excel"]').on('change', function () {
+            var input = this, $button = $(this).next('button');
+            setTimeout(function () {
+                if (typeof input.value === 'string' && input.value.length > 5) {
+                    $button.find('i').addClass('color-green layui-icon-vercode').removeClass('layui-icon-upload-drag');
+                } else {
+                    $button.find('i').removeClass('color-green layui-icon-vercode').addClass('layui-icon-upload-drag');
+                }
+            }, 300);
+        }).trigger('change');
+    })
+
+    require(['ckeditor', 'angular'], function () {
+        var app = angular.module("Form", []).run(callback);
+        angular.bootstrap(document.getElementById(app.name), [app.name]);
+        function callback($rootScope) {
+            $rootScope.hsitoryBack = function () {
+                $.msg.confirm('确定要取消导入吗？', function (index) {
+                    history.back(), $.msg.close(index);
+                });
+            };
+
+        }
+    })
+</script>
+
+{/block}

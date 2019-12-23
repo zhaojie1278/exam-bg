@@ -1,0 +1,33 @@
+<form id="subject_class_form" class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">考试须知</span>
+                <span class="color-desc margin-left-5">Content</span>
+                <textarea placeholder="请输入考试须知内容" required class="layui-textarea" name="content" style="height: 300px;">{$vo.content|default=""}</textarea>
+            </label>
+        </div>
+    </div>
+
+    <div class="hr-line-dashed"></div>
+    {notempty name='vo.id'}<input type='hidden' value='{$vo.id}' name='id'>{/notempty}
+
+    <div class="layui-form-item text-center">
+        <button id="subject_class_sub" class="layui-btn" type='button'>保存数据</button>
+        <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消编辑吗？" data-close>取消编辑</button>
+    </div>
+
+</form>
+
+<script>
+    $(function(){
+        $("#subject_class_sub").click(function(){
+            var is_rand = $('#div_is_rand .layui-form-radioed').prev().attr('value');
+            var is_open_score = $('#div_is_open_sorce .layui-form-radioed').prev().attr('value');
+            $("input[name='is_rand']").val(is_rand);
+            $("input[name='is_open_score']").val(is_open_score);
+            $("#subject_class_form").submit();
+        });
+    })
+    window.form.render();
+</script>
