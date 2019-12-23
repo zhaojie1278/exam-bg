@@ -7,7 +7,7 @@
     <div class="layui-card-body padding-left-40">
         <div class="layui-form-item">
             <label class="relative block">
-                <span class="color-green">试题分类</span>
+                <span class="color-green">试卷</span>
                 <select class="layui-select" required name="cid" id="">
                     {foreach $class as $item}
                     {if isset($vo.cid) and $vo.cid eq $item.id}
@@ -21,6 +21,13 @@
         </div>
         <div class="layui-form-item">
             <label class="relative block">
+                <span class="color-green">每题分数预设</span>
+                <span class="color-desc margin-left-5">最少1分，最多100分</span>
+                <input type="number" required name="score" value='{$vo.score|default="1"}' placeholder="请输入分数" class="layui-input">
+            </label>
+        </div>
+        <!-- <div class="layui-form-item">
+            <label class="relative block">
                 <span class="color-green">选择章节</span>
                 <select class="layui-select" name="chapter" id="">
                     <option value="">-- 默认 --</option>
@@ -33,7 +40,7 @@
                     {/foreach}
                 </select>
             </label>
-        </div>
+        </div> -->
         <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green font-w7">Excel文件</span>

@@ -1,13 +1,13 @@
-<form class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off">
+<form id="subject_class_form" class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off">
     <div class="layui-card-body padding-left-40">
         <div class="layui-form-item">
             <label class="relative block">
-                <span class="color-green font-w7">试题分类名称</span>
+                <span class="color-green font-w7">试卷名称</span>
                 <span class="color-desc margin-left-5">Name</span>
-                <input name="name" value='{$vo.name|default=""}' required pattern="^.{2,}$" placeholder="请输入试题分类名称" class="layui-input">
+                <input name="name" value='{$vo.name|default=""}' required pattern="^.{2,}$" placeholder="请输入试卷名称" class="layui-input">
             </label>
         </div>
-        <div class="layui-form-item">
+        <!-- <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green">选择科目</span>
                 <select class="layui-select" required name="cate_id" id="">
@@ -20,26 +20,70 @@
                     {/foreach}
                 </select>
             </label>
+        </div> -->
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">考试日期</span>
+                <input id="subject_class_date" data-date-input='date' required name="subject_class_date" value="{notempty name="vo.begin_time"}{:date('Y-m-d', $vo.begin_time)}{/notempty}" placeholder="请选择考试日期" class="layui-input">
+            </label>
         </div>
         <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">考试时间</span>
+                <input id="subject_class_time" data-date-input='datetime' required name="subject_class_time" value="{notempty name="vo.end_time"}{:date('H:i:s', $vo.begin_time)} - {:date('H:i:s', $vo.end_time)}{/notempty}" placeholder="请选择考试时间" class="layui-input">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">题目顺序打乱</span>
+                <br/>
+                <div id="div_is_rand">
+                    <input type="hidden" name="is_rand" value="{empty name='vo.is_rand'}0{else/}1{/empty}"/>
+                    <input class="layui-input" type="radio" required name="is_rand_layui" value="0" title="不打乱" {empty name="vo.is_rand"}checked{/empty} placeholder="请选择创建时间" >
+                    <input class="layui-input" type="radio" required name="is_rand_layui" value="1" title="打乱" {notempty name="vo.is_rand"}{if condition="$vo.is_rand==1"}checked{/if}{/notempty}>
+                </div>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">考试结束公布分数</span>
+                <br/>
+                <div id="div_is_open_sorce">
+                    <input type="hidden" name="is_open_score" value="{empty name='vo.is_open_score'}0{else/}1{/empty}"/>
+                    <input type="radio" required name="is_open_score_layui" value="0" title="不公布" {empty name="vo.is_open_score"}checked{/empty}>
+                    <input type="radio" required name="is_open_score_layui" value="1" title="公布" {notempty name="vo.is_open_score"}{if condition="$vo.is_open_score==1"}checked{/if}{/notempty}>
+                </div>
+            </label>
+        </div>
+        <!-- <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green font-w7">难度</span>
                 <span class="color-desc margin-left-5">diff</span>
                 <input name="star" value='{$vo.star|default=""}' placeholder="请输入试题难度" class="layui-input">
             </label>
-        </div>
+        </div> -->
     </div>
 
     <div class="hr-line-dashed"></div>
     {notempty name='vo.id'}<input type='hidden' value='{$vo.id}' name='id'>{/notempty}
 
     <div class="layui-form-item text-center">
-        <button class="layui-btn" type='submit'>保存数据</button>
+        <button id="subject_class_sub" class="layui-btn" type='button'>保存数据</button>
         <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消编辑吗？" data-close>取消编辑</button>
     </div>
 
 </form>
 
 <script>
+    $(function(){
+        $("#subject_class_sub").click(function(){
+            var is_rand = $('#div_is_rand .layui-form-radioed').prev().attr('value');
+            var is_open_score = $('#div_is_open_sorce .layui-form-radioed').prev().attr('value');
+            $("input[name='is_rand']").val(is_rand);
+            $("input[name='is_open_score']").val(is_open_score);
+            $("#subject_class_form").submit();
+        });
+    })
     window.form.render();
+    laydate.render({range: true, elem: '[name="subject_class_time"]', type: 'time'})
 </script>

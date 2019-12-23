@@ -1,4 +1,20 @@
 {extend name='main'}
+
+{block name="button"}
+
+<!-- {if auth("add")}
+<button data-open='{:url("add")}' data-title="添加学员" class='layui-btn layui-btn-sm layui-btn-primary'>添加学员</button>
+{/if} -->
+{if auth("batchadd")}
+<button data-open='{:url("batchadd")}' data-title="" class='layui-btn layui-btn-sm layui-btn-primary'>批量添加</button>
+{/if}
+
+{if auth("remove")}
+<button data-action='{:url("remove")}' data-confirm="确定要删除选定学员吗？"   data-csrf="{:systoken('remove')}" data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-primary'>删除学员</button>
+{/if}
+
+{/block}
+
 {block name="content"}
 <div class="think-box-shadow">
     {include file='member/index_search'}
@@ -11,6 +27,7 @@
             </th>
             <th class='text-left nowrap'>UID</th>
             <th class='text-left nowrap'>用户信息</th>
+            <th class='text-left nowrap'>班级</th>
             <th class='text-left nowrap'>用户状态</th>
             <th class='text-left nowrap'>联系手机</th>
             <th class='text-left nowrap'>电子邮箱</th>
@@ -30,9 +47,14 @@
             <td class='text-left nowrap relative layui-elip'>
                 <img src="{$vo.headimg|default=''}" onerror="$(this).remove()" data-tips-image class="inline-block" style="width:40px;height:40px;vertical-align:top;margin-right:5px">
                 <div class="inline-block">
-                    昵称：{$vo.nickname|default='--'}<br>
-                    OpenID: {$vo.openid|default='-'}
+                    考生姓名: {$vo.real_name|default='-'}<br>
+                    考生学号: {$vo.class_no|default='-'}<br>
+                    <!-- 昵称：{$vo.nickname|default='--'}<br> -->
+                    <!-- OpenID: {$vo.openid|default='-'} -->
                 </div>
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.class_name|default='-'}
             </td>
             <td class='text-left nowrap'>{eq name='vo.status' value='0'}<span class="color-red">冻结</span>{else}<span class="color-green">正常</span>{/eq}</td>
             <td class='text-left nowrap'>

@@ -3,7 +3,11 @@
 {block name="button"}
 
 {if auth("add")}
-<button data-modal='{:url("add")}' data-title="添加试题分类" class='layui-btn layui-btn-sm layui-btn-primary'>添加试题分类</button>
+<button data-modal='{:url("add")}' data-title="添加试卷" class='layui-btn layui-btn-sm layui-btn-primary'>添加试卷</button>
+{/if}
+
+{if auth("remove")}
+<button data-action='{:url("remove")}' data-confirm="确定要删除选定试卷吗？" data-csrf="{:systoken('remove')}" data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-primary'>删除试卷</button>
 {/if}
 {/block}
 
@@ -18,12 +22,15 @@
                 <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
             </th>
             <th class='text-left nowrap'>ID</th>
-            <th class='text-left nowrap'>试题分类</th>
-            <th class='text-left nowrap'>试题科目</th>
+            <th class='text-left nowrap'>试卷</th>
+            <!-- <th class='text-left nowrap'>试题科目</th> -->
             <th class='text-left nowrap'>题目数量</th>
-            <th class='text-left nowrap'>难度</th>
+            <!-- <th class='text-left nowrap'>难度</th> -->
+            <th class='text-left nowrap'>考试时间</th>
+            <th class='text-left nowrap'>是否打乱</th>
+            <th class='text-left nowrap'>考试结束公布分数</th>
             <th class='text-left nowrap'>创建时间</th>
-            <th></th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
@@ -38,25 +45,34 @@
             <td class='text-left nowrap'>
                 {$vo.name|default='-'}
             </td>
-            <td class='text-left nowrap'>
+            <!-- <td class='text-left nowrap'>
                 {$category[$vo.cate_id]|default='-'}
-            </td>
+            </td> -->
             <td class='text-left nowrap'>
                 {$vo.snum|default='-'}
             </td>
-            <td class='text-left nowrap'>
+            <!-- <td class='text-left nowrap'>
                 {$vo.star|default='-'}
+            </td> -->
+            <td class='text-left'>
+                {$vo.begin_time|format_datetime} <br/>至<br/> {$vo.end_time|format_datetime}
+            </td>
+            <td class='text-left nowrap'>
+                {if condition='$vo.is_rand == 1'}打乱{else /}不打乱{/if}
+            </td>
+            <td class='text-left nowrap'>
+                {if condition='$vo.is_open_score == 1'}公开{else /}不公开{/if}
             </td>
             <td class='text-left nowrap'>
                 {$vo.create_at|format_datetime}
             </td>
             <td class='text-left nowrap'>
                 {if auth("edit")}
-                <a class="layui-btn layui-btn-sm" data-title="编辑试题分类" data-modal='{:url("edit")}?id={$vo.id}'>编 辑</a>
+                <a class="layui-btn layui-btn-sm" data-title="编辑试卷" data-modal='{:url("edit")}?id={$vo.id}'>编 辑</a>
                 {/if}
 
                 {if auth("remove")}
-                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除该分类吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除该试卷吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
                 {/if}
             </td>
         </tr>

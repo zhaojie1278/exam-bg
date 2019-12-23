@@ -5,13 +5,13 @@
     <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">题库名称</label>
+            <label class="layui-form-label">试卷名称</label>
             <div class="layui-input-inline">
-                <input name="name" value="{$Think.get.name|default=''}" placeholder="请输入题库名称" class="layui-input">
+                <input name="name" value="{$Think.get.name|default=''}" placeholder="请输入试卷名称" class="layui-input">
             </div>
         </div>
 
-        <div class="layui-form-item layui-inline">
+       <!--  <div class="layui-form-item layui-inline">
             <label class="layui-form-label">试题科目</label>
             <div class="layui-input-inline">
                 <select class="layui-select" name="cate_id" lay-search>
@@ -21,7 +21,7 @@
                     {/foreach}
                 </select>
             </div>
-        </div>
+        </div> -->
 
         <div class="layui-form-item layui-inline">
             <label class="layui-form-label">创建时间</label>

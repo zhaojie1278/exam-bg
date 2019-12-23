@@ -5,9 +5,21 @@
     <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">用户昵称</label>
+            <label class="layui-form-label">班级</label>
             <div class="layui-input-inline">
-                <input name="nickname" value="{$Think.get.nickname|default=''}" placeholder="请输入用户昵称" class="layui-input">
+                <select class="layui-select" name="class_id" lay-search>
+                    <option value="">-- 全部 --</option>
+                    {foreach $member_class as $key=>$item}
+                    <option value="{$item['id']}" {$Think.get.class_id==$item['id']?'selected':''}>{$item['name']}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">用户姓名</label>
+            <div class="layui-input-inline">
+                <input name="real_name" value="{$Think.get.real_name|default=''}" placeholder="请输入用户姓名" class="layui-input">
             </div>
         </div>
 

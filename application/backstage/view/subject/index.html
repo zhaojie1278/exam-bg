@@ -8,6 +8,11 @@
 {if auth("batchadd")}
 <button data-open='{:url("batchadd")}' data-title="" class='layui-btn layui-btn-sm layui-btn-primary'>批量添加</button>
 {/if}
+
+{if auth("remove")}
+<button data-action='{:url("remove")}' data-confirm="确定要删除选定试题吗？"   data-csrf="{:systoken('remove')}" data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-primary'>删除试题</button>
+{/if}
+
 {/block}
 
 {block name="content"}
@@ -21,13 +26,14 @@
                 <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
             </th>
             <th class='text-left nowrap'>ID</th>
-            <th class='text-left nowrap'>试题分类</th>
-            <th class='text-left nowrap'>所属章节</th>
+            <th class='text-left nowrap'>试卷</th>
+            <!-- <th class='text-left nowrap'>所属章节</th> -->
             <th class='text-left' width="400">题目</th>
-            <th class='text-left nowrap'>难易程度</th>
-            <th class='text-left nowrap'>全站作答</th>
+            <th class='text-left nowrap'>分数</th>
+            <!-- <th class='text-left nowrap'>难易程度</th> -->
+            <!-- <th class='text-left nowrap'>全站作答</th> -->
             <th class='text-left nowrap'>创建时间</th>
-            <th></th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
@@ -42,18 +48,21 @@
             <td class='text-left nowrap'>
                 {$vo.cname|default='-'}
             </td>
-            <td class='text-left nowrap'>
+            <!-- <td class='text-left nowrap'>
                 {$vo.chapter|default='-'}
-            </td>
+            </td> -->
             <td class='text-left' width="400">
                 {$vo.question|default='-'}
             </td>
             <td class='text-left nowrap'>
+                {$vo.score|default='-'}
+            </td>
+            <!-- <td class='text-left nowrap'>
                 {if $vo.difficulty == 1}容易{elseif $vo.difficulty == 2}困难{else}-{/if}
             </td>
             <td class='text-left nowrap'>
                 {$vo.used|default='-'}
-            </td>
+            </td> -->
             <td class='text-left nowrap'>
                 {$vo.create_at|format_datetime}
             </td>

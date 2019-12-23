@@ -5,13 +5,13 @@
     <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">用户昵称</label>
+            <label class="layui-form-label">用户姓名</label>
             <div class="layui-input-inline">
-                <input name="nickname" value="{$Think.get.nickname|default=''}" placeholder="请输入用户昵称" class="layui-input">
+                <input name="real_name" value="{$Think.get.real_name|default=''}" placeholder="请输入用户姓名" class="layui-input">
             </div>
         </div>
 
-        <div class="layui-form-item layui-inline">
+        <!-- <div class="layui-form-item layui-inline">
             <label class="layui-form-label">考试类型</label>
             <div class="layui-input-inline">
                 <select class="layui-select" name="otype" lay-search>
@@ -21,7 +21,7 @@
                     {/foreach}
                 </select>
             </div>
-        </div>
+        </div> -->
 
         <div class="layui-form-item layui-inline">
             <label class="layui-form-label">考试时间</label>

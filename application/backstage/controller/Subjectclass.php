@@ -17,6 +17,7 @@ namespace app\backstage\controller;
 
 use library\Controller;
 use think\Db;
+use think\Request;
 
 /**
  * 试题分类
@@ -92,6 +93,20 @@ class Subjectclass extends Controller
     {
         if ($this->request->isPost()) {
 
+            $sub_class_date = input('post.subject_class_date');
+            $sub_class_time = input('post.subject_class_time');
+            $begin_time = 0;
+            $end_time = 0;
+            if (!empty($sub_class_date) && !empty($sub_class_time)) {
+                $sub_class_times = explode(' - ', $sub_class_time);
+                $begin_time = strtotime($sub_class_date.' '.trim($sub_class_times[0]));
+                $end_time = strtotime($sub_class_date.' '.trim($sub_class_times[1]));
+                if ($begin_time >= $end_time) {
+                    $this->error("考试结束时间需大于开始时间！");
+                }
+            }
+           $data['begin_time'] = $begin_time;
+           $data['end_time'] = $end_time;
            $data['create_at'] = date('Y-m-d H:i:s');
 
         }

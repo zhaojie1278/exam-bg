@@ -10,8 +10,9 @@
                 <input data-auto-none data-check-target='.list-check-box' type='checkbox'>
             </th>
             <th class='text-left nowrap'>ID</th>
-            <th class='text-left nowrap'>用户昵称</th>
-            <th class='text-left nowrap'>考试类型</th>
+            <th class='text-left nowrap'>试卷</th>
+            <th class='text-left nowrap'>学号</th>
+            <th class='text-left nowrap'>姓名</th>
             <th class='text-left nowrap'>试题数</th>
             <th class='text-left nowrap'>正确率</th>
             <th class='text-left nowrap'>得分</th>
@@ -30,10 +31,13 @@
                 <span class="font-w7">{$vo.id|default='-'}</span>
             </td>
             <td class='text-left nowrap'>
-                {$vo.nickname|default='-'}
+                <b>{$vo.subject_class_name|default='-'}</b>
             </td>
             <td class='text-left nowrap'>
-                {$otype[$vo.otype]|default='-'}
+                {$vo.class_no|default='-'}
+            </td>
+            <td class='text-left nowrap'>
+                {$vo.real_name|default='-'}
             </td>
             <td class='text-left nowrap'>
                 {$vo.sub_id|count|default='-'}
@@ -45,7 +49,7 @@
                 {$vo.score|default='0'}
             </td>
             <td class='text-left nowrap'>
-                {$vo.time|default='0'}s
+                {:time_remainder($vo.time)}
             </td>
             <td class='text-left nowrap'>
                 {$vo.create_at|format_datetime}
@@ -59,13 +63,14 @@
         {/foreach}
         <tr style="background-color: #dddddd">
             <td></td>
+            <td></td>
             <td><span class="font-w7">平均</span></td>
             <td></td>
             <td></td>
             <td></td>
             <td><span class="font-w7">{$avg_right_pre}%</span></td>
             <td><span class="font-w7">{$avg_score}</span></td>
-            <td><span class="font-w7">{$avg_time}s</span></td>
+            <td><span class="font-w7">{:time_remainder($avg_time)}</span></td>
             <td></td>
             <td></td>
         </tr>

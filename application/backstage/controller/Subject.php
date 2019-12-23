@@ -60,9 +60,9 @@ class Subject extends Controller
      */
     protected function _index_page_filter(&$data)
     {
-        foreach($data as &$vo){
+        /*foreach($data as &$vo){
             $vo['chapter'] = Db::name('XmChapter')->where('id',$vo['chapter_id'])->where('is_deleted',0)->value('name');
-        }
+        }*/
 
     }
 
@@ -95,7 +95,7 @@ class Subject extends Controller
     {
         if ($this->request->isPost()) {
             $excel = $this->request->post('excel');
-            $chapter = $this->request->post('chapter');
+            $score = $this->request->post('score');
 
             if(!$this->request->post('cid')){
                 $this->error('缺少参数');
@@ -104,7 +104,7 @@ class Subject extends Controller
 
             $excel = substr($excel,stripos($excel,'upload'));
 
-            $data = $this->initExcel($excel,$this->request->post('cid'),$chapter);
+            $data = $this->initExcel($excel,$this->request->post('cid'),$score);
             //dump($data);
             if(count($data)){
                 $res = Db::name('XmSubject')->insertAll($data);
@@ -121,7 +121,7 @@ class Subject extends Controller
         }
         $this->title = '批量添加试题';
 
-        $chapter = Db::name('XmChapter')->where('is_deleted',0)->select();
+        /*$chapter = Db::name('XmChapter')->where('is_deleted',0)->select();
 
         foreach ($chapter as &$vo) {
             if($vo['pid'] == 0){
@@ -135,7 +135,7 @@ class Subject extends Controller
         }
         $chapter = Data::arr2table($chapter);
 
-        $this->assign('chapter',$chapter);
+        $this->assign('chapter',$chapter);*/
         $this->_form($this->table, 'form_batch');
     }
 
@@ -151,6 +151,10 @@ class Subject extends Controller
         if ($this->request->isPost()) {
 
             $input = $this->request->post();
+
+            if (empty($input['score']) || $input['score'] <= 0 || $input['score'] > 100) {
+                $this->error("请填写正确的分数，最低1，最多100");
+            }
 
             //答案选项
             if(!array_key_exists('answers',$input)){
@@ -186,7 +190,7 @@ class Subject extends Controller
             }
 
         }elseif ($this->request->isGet()) {
-            $class = Db::name('XmSubjectClass')->select();
+            $class = Db::name('XmSubjectClass')->where('is_deleted',0)->select();
             $this->class = $class;
 
 
@@ -227,7 +231,20 @@ class Subject extends Controller
         $this->_form($this->table, 'form');
     }
 
-    private function initExcel($url,$cid,$chapter)
+    /**
+     * 删除
+     * @auth true
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function remove()
+    {
+        $this->applyCsrfToken();
+        $this->_delete($this->table);
+    }
+
+    // 导入试题
+    private function initExcel($url,$cid,$score)
     {
         $PHPReader = new PHPExcel_Reader_Excel2007();
         //载入文件
@@ -262,71 +279,89 @@ class Subject extends Controller
             foreach($data as $k=>$v){
                 $tmp = [];
                 $tmp['cid'] =  $cid;
-                if($v['A']==''&&$scene){
-                    $tmp['scene'] = $scene;
-                }else{
-                    $tmp['scene'] = str_replace("【情景】",'',$v['A']);
-                    $scene = $tmp['scene'];
+                if (empty($v['A'])) {
+                    // 没有试题
+                    continue;
                 }
-                $tmp['question'] =  preg_replace("/^[0-9]+[.]/",'', $v['B']);
-                $tmp['check_answer'] =  $v['H'];
 
-                $tmp_ans = [];
-                $tmp_ans['a'] = 'A';
-                if($v['H'] == 'A'){
-                    $tmp_ans['c'] = true;
-                }else{
-                    $tmp_ans['c'] = false;
+                // 题目
+                $tmp['question'] =  preg_replace("/^[0-9]+[.]/",'', $v['A']);
+
+                // 正确答案
+                $tmp['check_answer'] =  $v['G'];
+
+                $tmp['answer'] = [];
+                if (!empty($v['B'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'A';
+                    if($v['G'] == 'A'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['B']);
+                    $tmp['answer'][] =  $tmp_ans;
                 }
-                $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['C']);
-                $tmp['answer'][] =  $tmp_ans;
 
-                $tmp_ans = [];
-                $tmp_ans['a'] = 'B';
-                if($v['H'] == 'B'){
-                    $tmp_ans['c'] = true;
-                }else{
-                    $tmp_ans['c'] = false;
+                if (!empty($v['C'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'B';
+                    if($v['G'] == 'B'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['C']);
+                    $tmp['answer'][] =  $tmp_ans;
                 }
-                $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['D']);
-                $tmp['answer'][] =  $tmp_ans;
 
-                $tmp_ans = [];
-                $tmp_ans['a'] = 'C';
-                if($v['H'] == 'C'){
-                    $tmp_ans['c'] = true;
-                }else{
-                    $tmp_ans['c'] = false;
+                if (!empty($v['D'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'C';
+                    if($v['G'] == 'C'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['D']);
+                    $tmp['answer'][] =  $tmp_ans;
                 }
-                $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['E']);
-                $tmp['answer'][] =  $tmp_ans;
 
-                $tmp_ans = [];
-                $tmp_ans['a'] = 'D';
-                if($v['H'] == 'D'){
-                    $tmp_ans['c'] = true;
-                }else{
-                    $tmp_ans['c'] = false;
+                if (!empty($v['E'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'D';
+                    if($v['G'] == 'D'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['E']);
+                    $tmp['answer'][] =  $tmp_ans;
                 }
-                $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['F']);
-                $tmp['answer'][] =  $tmp_ans;
 
-                $tmp_ans = [];
-                $tmp_ans['a'] = 'E';
-                if($v['H'] == 'E'){
-                    $tmp_ans['c'] = true;
-                }else{
-                    $tmp_ans['c'] = false;
+                if (!empty($v['F'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'E';
+                    if($v['G'] == 'E'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['F']);
+                    $tmp['answer'][] =  $tmp_ans;
                 }
-                $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['G']);
-                $tmp['answer'][] =  $tmp_ans;
 
+                // 如果没有题目答案
+                if (!$tmp['answer']) {
+                    continue;
+                }
                 $tmp['answer'] = json_encode($tmp['answer']);
-                if($chapter){
-                    $tmp['chapter_id'] = $chapter;
+
+                if($score){
+                    $tmp['score'] = $score;
                 }
                 $tmp['create_at'] = date("Y-m-d H:i:s");
-                $tmp['analysis'] = str_replace("【解析】",'',$v['I']);
+                // $tmp['analysis'] = str_replace("【解析】",'',$v['I']);
 
                 $returnData[] = $tmp;
             }

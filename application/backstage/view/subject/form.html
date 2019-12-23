@@ -8,7 +8,7 @@
     <div class="layui-card-body padding-left-40">
         <div class="layui-form-item">
             <label class="relative block">
-                <span class="color-green">试题分类</span>
+                <span class="color-green">试卷</span>
                 <select class="layui-select" required name="cid" id="">
                     {foreach $class as $item}
                     {if isset($vo.cid) and $vo.cid eq $item.id}
@@ -26,7 +26,7 @@
                 <textarea placeholder="请输入题目" required class="layui-textarea" name="question">{$vo.question|default=""}</textarea>
             </label>
         </div>
-        <div class="layui-form-item">
+        <!-- <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green font-w7">题目配图</span>
                 <span class="color-desc margin-left-5">非必填项</span>
@@ -79,7 +79,7 @@
                 <textarea placeholder="请输入题目情景" class="layui-textarea" name="scene">{$vo.scene|default=""}</textarea>
             </label>
         </div>
-
+ -->
         <a class="layui-btn layui-btn-sm layui-btn-primary" ng-click="addOptionRow(option)">增加选项</a>
         <div class="layui-form-item">
             <table class="layui-table margin-top-10">
@@ -108,6 +108,13 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green">题目分数</span>
+                <span class="color-desc margin-left-5">最少1分，最多100分</span>
+                <input type="number" name="score" required value='{$vo.score|default="1"}' placeholder="请输入分数" class="layui-input">
+            </label>
         </div>
         <div class="layui-form-item">
             <label class="relative block">

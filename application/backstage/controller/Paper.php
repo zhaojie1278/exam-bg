@@ -50,10 +50,13 @@ class Paper extends Controller
      */
     public function index()
     {
-        $this->title = '试卷列表';
+        $this->title = '考试记录';
         $this->assign('otype',$this->otype);
-        $query = $this->_query($this->table)->like('otype,nickname');
-        $query->alias('p')->join('xm_member m','m.id = p.uid','LEFT')->dateBetween('p.create_at#create_at')->order('p.id desc')->field('m.nickname as nickname,p.*')->page();
+        $query = $this->_query($this->table)->like('otype,real_name');
+        $query->alias('p')
+            ->join('xm_member m','m.id = p.uid','LEFT')
+            ->join('xm_subject_class sc','sc.id = p.cid','LEFT')
+            ->dateBetween('p.create_at#create_at')->order('p.id desc')->field('m.real_name,m.class_no,p.*,sc.name as subject_class_name')->page();
 
     }
 
