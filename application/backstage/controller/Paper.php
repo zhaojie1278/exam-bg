@@ -56,7 +56,7 @@ class Paper extends Controller
         $query->alias('p')
             ->join('xm_member m','m.id = p.uid','LEFT')
             ->join('xm_subject_class sc','sc.id = p.cid','LEFT')
-            ->dateBetween('p.create_at#create_at')->order('p.id desc')->field('m.real_name,m.class_no,p.*,sc.name as subject_class_name')->page();
+            ->dateBetween('p.create_at#create_at')->order('p.id')->field('m.real_name,m.class_no,p.*,sc.name as subject_class_name')->page();
 
     }
 

@@ -32,7 +32,9 @@ function time_remainder($time)
     }
     if ($time > 0) {
         $strtime .= intval($time).'秒';
-    } else {
+    }
+
+    if (!$strtime) {
         $strtime = "时间错误";
     }
     return $strtime;

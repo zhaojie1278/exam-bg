@@ -105,6 +105,21 @@ class Member extends Controller
     }
 
     /**
+     * 添加
+     * @auth true
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    public function add()
+    {
+        $this->applyCsrfToken();
+        $this->_form($this->table, 'form');
+    }
+    
+    /**
      * 表单数据处理
      * @param array $data
      * @throws \think\db\exception\DataNotFoundException

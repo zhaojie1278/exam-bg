@@ -17,9 +17,15 @@
         </div>
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">用户姓名</label>
+            <label class="layui-form-label">学号</label>
             <div class="layui-input-inline">
-                <input name="real_name" value="{$Think.get.real_name|default=''}" placeholder="请输入用户姓名" class="layui-input">
+                <input name="class_no" value="{$Think.get.class_no|default=''}" placeholder="请输入学员姓名" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">学员姓名</label>
+            <div class="layui-input-inline">
+                <input name="real_name" value="{$Think.get.real_name|default=''}" placeholder="请输入学员姓名" class="layui-input">
             </div>
         </div>
 
@@ -32,7 +38,7 @@
 
 
         <div class="layui-form-item layui-inline">
-            <label class="layui-form-label">用户状态</label>
+            <label class="layui-form-label">学员状态</label>
             <div class="layui-input-inline">
                 <select class="layui-select" name="status" lay-search>
                     <option value="">-- 全部 --</option>
