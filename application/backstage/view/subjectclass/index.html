@@ -74,6 +74,10 @@
                 {if auth("remove")}
                 <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除该试卷吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
                 {/if}
+
+                {if auth("exportpaperstatisbefore")}
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-action="{:url('exportpaperstatisbefore', ['id' => $vo.id])}" data-value="id#{$vo.id}" data-csrf="{:systoken('exportpaperstatisbefore')}">导出考试统计</a>
+                {/if}
             </td>
         </tr>
         {/foreach}
