@@ -200,7 +200,7 @@ class Member extends Controller
         $this->_delete($this->table);
     }
 
-    // 导入试题
+    // 导入学员
     private function initExcel($url,$class_id)
     {
         $PHPReader = new PHPExcel_Reader_Excel2007();

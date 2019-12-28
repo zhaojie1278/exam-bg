@@ -48,7 +48,7 @@ class Subject extends Controller
         $this->title = '试题列表';
         $this->assign('category',Db::name("XmSubjectClass")->where(['is_deleted' => '0'])->select());
         $query = $this->_query($this->table)->like('question,cid');
-        $query->alias('s')->join('xm_subject_class a','s.cid=a.id')->field('s.*,a.name as cname')->dateBetween('s.create_at')->where(['s.is_deleted' => '0'])->order('s.id desc')->page();
+        $query->alias('s')->join('xm_subject_class a','s.cid=a.id')->field('s.*,a.name as cname')->dateBetween('s.create_at')->where(['s.is_deleted' => '0'])->order('s.id')->page();
 
     }
 
