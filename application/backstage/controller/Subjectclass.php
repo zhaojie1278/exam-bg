@@ -123,7 +123,7 @@ class Subjectclass extends Controller
 
                 //设置单元格宽度
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('A')->setWidth(17);
-                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(17);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(20);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(15);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('D')->setWidth(10);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('E')->setWidth(20);
@@ -133,7 +133,7 @@ class Subjectclass extends Controller
                 $paper_excel_row_index = 2;
             }
             $objPHPExcel->getActiveSheet()->setCellValue('A'.($paper_excel_row_index),$paper_list[$i]['mc_name']);
-            $objPHPExcel->getActiveSheet()->setCellValue('B'.($paper_excel_row_index),$paper_list[$i]['class_no']);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.($paper_excel_row_index),$paper_list[$i]['class_no'].' ');
             $objPHPExcel->getActiveSheet()->setCellValue('C'.($paper_excel_row_index),$paper_list[$i]['real_name']);
             $objPHPExcel->getActiveSheet()->setCellValue('D'.($paper_excel_row_index),$paper_list[$i]['score']);
             $objPHPExcel->getActiveSheet()->setCellValue('E'.($paper_excel_row_index),$paper_list[$i]['create_at']);
@@ -143,7 +143,7 @@ class Subjectclass extends Controller
     }
 
     /**
-     * 错题排行，前20
+     * 错题排行
      * sub_cid 试卷ID
      */
     private function exc_wrong_subs($sheet_index, $sub_cid, &$objPHPExcel) {
@@ -160,9 +160,10 @@ class Subjectclass extends Controller
             ->join('xm_subject sub', 'ss.sub_id=sub.id')
             ->join('xm_subject_class subc', 'sub.cid=subc.id')
             ->field('ss.*,sub.question,sub.answer,subc.name as subject_class_name')
-            ->where(['ss.cid' => $sub_cid])
+            ->where('ss.cid', $sub_cid)
+            ->where('ss.unright_count', '>', 0)
             ->order('ss.unright_count desc')
-            ->limit(20)
+            // ->limit(20)
             ->select();
         if (!empty($wrong_subs) && count($wrong_subs) > 0) {
             // excel 表格 sheet
@@ -255,7 +256,7 @@ class Subjectclass extends Controller
             }
 
             //6.设置当前激活的sheet表格名称；
-            $objPHPExcel->getActiveSheet()->setTitle('错题排行前20');
+            $objPHPExcel->getActiveSheet()->setTitle('错题排行');
             // -- sheet 1 -- end
             $rs = 1;
         }
@@ -515,7 +516,7 @@ class Subjectclass extends Controller
         // -- sheet 3 -- end
 
         //6.设置保存的Excel表格名称
-        $filename = $subject_class_name.$subject_class_begin_date.'-'.date('Ymd',time()).'.xls';
+        $filename = '试卷【'.$subject_class_name.$subject_class_begin_date.'】-'.date('Ymd',time()).'.xls';
 
         //8.设置浏览器窗口下载表格
         header("Content-Type: application/force-download");
