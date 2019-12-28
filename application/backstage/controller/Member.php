@@ -128,7 +128,22 @@ class Member extends Controller
      */
     public function _form_filter(&$data)
     {
-        if ($this->request->isGet()) {
+        if ($this->request->isPost()) {
+
+            $input = $this->request->post();
+
+            if (empty($input['class_id'])) {
+                $this->error("请选择班级");
+            }
+
+            if (empty($input['class_no'])) {
+                $this->error("请输入学号");
+            }
+
+            if (empty($input['real_name'])) {
+                $this->error("请输入姓名");
+            }
+        } elseif ($this->request->isGet()) {
             $memberclass = Db::name('XmMemberClass')->where('is_deleted',0)->select();
             $this->memberclass = $memberclass;
         }

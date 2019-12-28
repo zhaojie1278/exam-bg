@@ -76,7 +76,7 @@
                 {/if}
 
                 {if auth("exportpaperstatisbefore")}
-                <a class="layui-btn layui-btn-sm layui-btn-danger" data-action="{:url('exportpaperstatisbefore', ['id' => $vo.id])}" data-value="id#{$vo.id}" data-csrf="{:systoken('exportpaperstatisbefore')}">导出考试统计</a>
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-action="{:url('exportpaperstatisbefore', ['id' => $vo.id])}" data-value="id#{$vo.id}" data-csrf="{:systoken('exportpaperstatisbefore')}" data-time="3">导出考试统计</a>
                 {/if}
             </td>
         </tr>

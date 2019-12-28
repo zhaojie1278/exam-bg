@@ -7,8 +7,9 @@
     <div class="layui-card-body padding-left-40">
         <div class="layui-form-item">
             <label class="relative block">
-                <span class="color-green">班级</span>
+                <span class="color-green font-w7">班级</span>
                 <select class="layui-select" required name="class_id" id="">
+                    <option value="0">请选择</option>
                     {foreach $memberclass as $item}
                     <option value="{$item.id}">{$item.name}</option>
                     {/foreach}

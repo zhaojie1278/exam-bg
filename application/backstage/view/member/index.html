@@ -3,8 +3,9 @@
 {block name="button"}
 
 {if auth("add")}
-<button data-open='{:url("add")}' data-title="添加学员" class='layui-btn layui-btn-sm layui-btn-primary'>添加学员</button>
+<button data-modal='{:url("add")}' data-title="添加学员" class='layui-btn layui-btn-sm layui-btn-primary'>添加学员</button>
 {/if}
+
 {if auth("batchadd")}
 <button data-open='{:url("batchadd")}' data-title="" class='layui-btn layui-btn-sm layui-btn-primary'>批量添加</button>
 {/if}

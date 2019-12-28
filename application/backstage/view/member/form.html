@@ -2,6 +2,21 @@
     <div class="layui-card-body padding-left-40">
         <div class="layui-form-item">
             <label class="relative block">
+                <span class="color-green font-w7">班级</span>
+                <select class="layui-select" required name="class_id" id="">
+                    <option value="0">请选择</option>
+                    {foreach $memberclass as $item}
+                    {if isset($vo.class_id) and $vo.class_id eq $item.id}
+                    <option selected value="{$item.id}">{$item.name}</option>
+                    {else}
+                    <option value="{$item.id}">{$item.name}</option>
+                    {/if}
+                    {/foreach}
+                </select>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
                 <span class="color-green font-w7">学员学号</span>
                 <span class="color-desc margin-left-5">ClassNo</span>
                 <input name="class_no" value='{$vo.class_no|default=""}' required pattern="^.{2,}$" placeholder="请输入学员学号" class="layui-input">
@@ -52,3 +67,7 @@
     </div>
 
 </form>
+
+<script>
+    window.form.render();
+</script>

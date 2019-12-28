@@ -70,23 +70,154 @@ class Subjectclass extends Controller
             return $list;
     }
 
-    // 考试学员统计：考试程序倒序排序
+    // 考试学员统计：班级、学号排序
     private function paper_statis($sub_cid) {
         $list = Db::name("XmSubjectPaper")
             ->alias('p')
             ->join('xm_subject_class c', 'c.id=p.cid')
             ->join('xm_member m', 'p.uid=m.id')
             ->join('xm_member_class mc', 'mc.id=m.class_id')
-            ->field('p.*,c.name as subject_class_name,m.real_name,m.class_no,m.create_at as paper_time,mc.name as mc_name')
-            ->order('p.score desc')            
-            ->where(['p.cid' => $sub_cid])->select();
+            ->field('p.*,c.name as subject_class_name,m.real_name,m.class_no,m.create_at as paper_time,mc.name as mc_name,mc.id as mc_id')
+            ->order('mc.id,m.class_no')
+            ->where(['p.cid' => $sub_cid])
+            ->select();
             return $list;
     }
 
-    // 试题数据分析：错题数、未做数、标注数
-    private function sub_statis($sub_cid) {
-        $rs_data = [];
+    // 分班级导出考试试卷列表，按照考生学号排序
+    private function exc_papers($sheet_index, $paper_list, &$objPHPExcel) {
+        // $sheet_index = 1;
 
+        // 表格数据起始行号
+        $paper_excel_row_index = 2;
+
+        //5.循环刚取出来的数组，将数据逐一添加到excel表格。
+        $mc_id = 0;
+        for($i=0;$i<count($paper_list);$i++){
+            $old_mc_id = $paper_list[$i]['mc_id'];
+            if ($mc_id != $old_mc_id) {
+                $mc_id = $old_mc_id;
+
+                // 分班级
+                $objPHPExcel->createSheet();
+                $objPHPExcel->setActiveSheetIndex($sheet_index);
+                //4.设置表格头（即excel表格的第一行）
+                $objPHPExcel->setActiveSheetIndex($sheet_index)
+                        ->setCellValue('A1', '试卷')
+                        ->setCellValue('B1', '班级')
+                        ->setCellValue('C1', '学号')
+                        ->setCellValue('D1', '姓名')
+                        ->setCellValue('E1', '得分')
+                        ->setCellValue('F1', '交卷时间');
+
+                //设置F列水平居中
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('A')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('B')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('C')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('D')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('E')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('F')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('G')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+                //设置单元格宽度
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('A')->setWidth(25);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(17);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(17);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('D')->setWidth(15);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('E')->setWidth(10);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('F')->setWidth(20);
+                //7.设置当前激活的sheet表格名称；
+                $objPHPExcel->getActiveSheet()->setTitle($paper_list[$i]['mc_name'].'-成绩');
+                $sheet_index++;
+                $paper_excel_row_index = 2;
+            }
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.($paper_excel_row_index),$paper_list[$i]['subject_class_name']);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.($paper_excel_row_index),$paper_list[$i]['mc_name']);
+            $objPHPExcel->getActiveSheet()->setCellValue('C'.($paper_excel_row_index),$paper_list[$i]['class_no']);
+            $objPHPExcel->getActiveSheet()->setCellValue('D'.($paper_excel_row_index),$paper_list[$i]['real_name']);
+            $objPHPExcel->getActiveSheet()->setCellValue('E'.($paper_excel_row_index),$paper_list[$i]['score']);
+            $objPHPExcel->getActiveSheet()->setCellValue('F'.($paper_excel_row_index),$paper_list[$i]['create_at']);
+            $paper_excel_row_index++;
+        }
+        // -- end
+    }
+
+    /**
+     * 错题排行，前20
+     * sub_cid 试卷ID
+     */
+    private function exc_wrong_subs($sheet_index, $sub_cid, &$objPHPExcel) {
+
+        $rs = 0;
+        // 统计数据
+        $rs_statis = $this->sub_statis($sub_cid);
+        if (!$rs_statis) {
+            return $rs;
+        }
+
+        $wrong_subs = Db::name('XmSubjectStatis')
+            ->alias('ss')
+            ->join('xm_subject sub', 'ss.sub_id=sub.id')
+            ->join('xm_subject_class subc', 'sub.cid=subc.id')
+            ->field('ss.*,sub.question,subc.name as subject_class_name')
+            ->where(['ss.cid' => $sub_cid])
+            ->order('ss.unright_count desc')
+            ->limit(20)
+            ->select();
+        if (!empty($wrong_subs) && count($wrong_subs) > 0) {
+            // excel 表格 sheet
+            $objPHPExcel->createSheet();
+            $objPHPExcel->setActiveSheetIndex($sheet_index);
+            //4.设置表格头（即excel表格的第一行）
+            $objPHPExcel->setActiveSheetIndex($sheet_index)
+                    ->setCellValue('A1', '序号')
+                    ->setCellValue('B1', '试卷')
+                    ->setCellValue('C1', '题目')
+                    ->setCellValue('D1', '错题人数');
+
+            //设置F列水平居中
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('A')->getAlignment()
+                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('B')->getAlignment()
+                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('C')->getAlignment()
+                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('D')->getAlignment()
+                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+            //设置单元格宽度
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(25);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(100);
+
+
+            //5.循环刚取出来的数组，将数据逐一添加到excel表格。
+            $list_count = count($wrong_subs);
+            for($i=0;$i<$list_count;$i++){
+                $objPHPExcel->getActiveSheet()->setCellValue('A'.($i+2),$i+1);// 序号
+                $objPHPExcel->getActiveSheet()->setCellValue('B'.($i+2),$wrong_subs[$i]['subject_class_name']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.($i+2),$wrong_subs[$i]['question']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D'.($i+2),$wrong_subs[$i]['unright_count']);
+            }
+
+            //6.设置当前激活的sheet表格名称；
+            $objPHPExcel->getActiveSheet()->setTitle('错题排行前20');
+            // -- sheet 1 -- end
+            $rs = 1;
+        }
+
+        return $rs;
+    }
+
+    // 试题数据分析及生成：错题数、未做数、标注数
+    private function sub_statis($sub_cid) {
+        $done_subs = 0;
         $count = Db::name("XmSubjectStatis")->where(['cid' => $sub_cid])->count('id');
         if ($count == 0) {
             // 整合数据：题目错题人数、题目标注人数、题目已做人数
@@ -156,9 +287,15 @@ class Subjectclass extends Controller
                 $sub_statised_data[] = array_merge($single_sub_statised, $sub_statised[$sub['id']]);
             }
             $done_subs = Db::name('XmSubjectStatis')->insertAll($sub_statised_data);
+        } else {
+            $done_subs = $count;
         }
 
-        if (1) {
+        return $done_subs;
+
+        /*if (1) { // TODO 判断
+            $rs_data = [];
+
             // 查找错题数最多的题目
             $wrong_sub = Db::name('XmSubjectStatis')
                 ->alias('ss')
@@ -206,7 +343,7 @@ class Subjectclass extends Controller
             } else {
                 $rs_data['undo'] = [];
             }
-        }
+        }*/
         return $rs_data;
     }
 
@@ -223,6 +360,7 @@ class Subjectclass extends Controller
                 $this->error('考试尚未结束，暂无法导出');
             }
             $this->success('正在创建导出请求，请不要关闭浏览器', url('exportpaperstatis', ['id' => $subject_class_id]));
+            // $this->success('正在创建导出请求，请不要关闭浏览器', ['wait' => 100000], 1);
         }
     }
 
@@ -231,6 +369,8 @@ class Subjectclass extends Controller
         $params = $this->request->param();
         $subject_class_id = $params[0];
 
+        $subject_class_name = '';
+        $subject_class_begin_date = '';
 
         //1.从数据库中取出数据
         $subclass_list = $this->sub_class_statis($subject_class_id);
@@ -243,12 +383,6 @@ class Subjectclass extends Controller
         if (empty($paper_list) || count($paper_list) == 0) {
             $this->error('当前试卷无考试学员数据');
         }
-
-
-        // 统计数据
-        $statis_list = $this->sub_statis($subject_class_id);
-       
-        
 
         //2.实例化PHPExcel类
         $objPHPExcel = new \PHPExcel();
@@ -266,12 +400,12 @@ class Subjectclass extends Controller
                 ->setCellValue('D1', '考试时间')
                 ->setCellValue('E1', '考试人数')
                 ->setCellValue('F1', '平均分')
-                ->setCellValue('G1', '正确率')
-                ->setCellValue('H1', '是否打乱题目')
-                ->setCellValue('I1', '错误最多题目')
-                ->setCellValue('J1', '正确最多题目')
-                ->setCellValue('K1', '标注最多题目')
-                ->setCellValue('L1', '未做最多题目');
+                ->setCellValue('G1', '正确率');
+                // ->setCellValue('H1', '是否打乱题目')
+                // ->setCellValue('I1', '错误最多题目')
+                // ->setCellValue('J1', '正确最多题目')
+                // ->setCellValue('K1', '标注最多题目')
+                // ->setCellValue('L1', '未做最多题目');
 
         //设置F列水平居中
         $objPHPExcel->setActiveSheetIndex($sheet1)->getStyle('A')->getAlignment()
@@ -288,18 +422,11 @@ class Subjectclass extends Controller
                     ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
         $objPHPExcel->setActiveSheetIndex($sheet1)->getStyle('G')->getAlignment()
                     ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getStyle('H')->getAlignment()
-                    ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
         //设置单元格宽度
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('B')->setWidth(30);
+        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('B')->setWidth(25);
         $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('D')->setWidth(50);
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('H')->setWidth(30);
 
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('I')->setWidth(30);
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('J')->setWidth(30);
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('K')->setWidth(30);
-        $objPHPExcel->setActiveSheetIndex($sheet1)->getColumnDimension('L')->setWidth(30);
 
         //5.循环刚取出来的数组，将数据逐一添加到excel表格。
         for($i=0;$i<count($subclass_list);$i++){
@@ -310,85 +437,37 @@ class Subjectclass extends Controller
             $objPHPExcel->getActiveSheet()->setCellValue('E'.($i+2),$subclass_list[$i]['member_count']);
             $objPHPExcel->getActiveSheet()->setCellValue('F'.($i+2),$subclass_list[$i]['avg_score']);
             $objPHPExcel->getActiveSheet()->setCellValue('G'.($i+2),$subclass_list[$i]['avg_right_pre']);
-            $objPHPExcel->getActiveSheet()->setCellValue('H'.($i+2),$subclass_list[$i]['is_rand'] == 1 ? '打乱' : '未打乱');
+            // $objPHPExcel->getActiveSheet()->setCellValue('H'.($i+2),$subclass_list[$i]['is_rand'] == 1 ? '打乱' : '未打乱');
 
-            $objPHPExcel->getActiveSheet()->setCellValue('I'.($i+2), !empty($statis_list['wrong']) ? $statis_list['wrong']['question'].'('.$statis_list['wrong']['unright_count'].'人)' : '无');
-            $objPHPExcel->getActiveSheet()->setCellValue('J'.($i+2), !empty($statis_list['right']) ? $statis_list['right']['question'].'('.$statis_list['right']['right_count'].'人)' : '无');
-            $objPHPExcel->getActiveSheet()->setCellValue('K'.($i+2), !empty($statis_list['mark']) ? $statis_list['mark']['question'].'('.$statis_list['mark']['mark_count'].'人)' : '无');
-            $objPHPExcel->getActiveSheet()->setCellValue('L'.($i+2), !empty($statis_list['undo']) ? $statis_list['undo']['question'].'('.$statis_list['undo']['undone_count'].'人)' : '无');
+            // $objPHPExcel->getActiveSheet()->setCellValue('I'.($i+2), !empty($statis_list['wrong']) ? $statis_list['wrong']['question'].'('.$statis_list['wrong']['unright_count'].'人)' : '无');
+            // $objPHPExcel->getActiveSheet()->setCellValue('J'.($i+2), !empty($statis_list['right']) ? $statis_list['right']['question'].'('.$statis_list['right']['right_count'].'人)' : '无');
+            // $objPHPExcel->getActiveSheet()->setCellValue('K'.($i+2), !empty($statis_list['mark']) ? $statis_list['mark']['question'].'('.$statis_list['mark']['mark_count'].'人)' : '无');
+            // $objPHPExcel->getActiveSheet()->setCellValue('L'.($i+2), !empty($statis_list['undo']) ? $statis_list['undo']['question'].'('.$statis_list['undo']['undone_count'].'人)' : '无');
+
+            $subject_class_name = $subclass_list[$i]['name'];
+            $subject_class_begin_date = date('Ymd', $subclass_list[$i]['begin_time']);
         }
 
         //7.设置当前激活的sheet表格名称；
         $objPHPExcel->getActiveSheet()->setTitle('试卷总体统计');
         // -- sheet 1 -- end
 
-        // -- sheet 2 学员信息 -- begin
+        // -- sheet 2 错题排行 -- begin
+        // if ($paper_list) {
+            $sheet_index = 1;
+            $this->exc_wrong_subs($sheet_index, $subject_class_id, $objPHPExcel);
+        // }
+        // -- sheet 2 -- end
+
+        // -- sheet 3 学员考试信息 -- begin
         if ($paper_list) {
-            $sheet2 = 1;
-            $objPHPExcel->createSheet();
-            $objPHPExcel->setActiveSheetIndex($sheet2);
-            //4.设置表格头（即excel表格的第一行）
-            $objPHPExcel->setActiveSheetIndex($sheet2)
-                    ->setCellValue('A1', '序号')
-                    ->setCellValue('B1', '试卷')
-                    ->setCellValue('C1', '试卷题数')
-                    ->setCellValue('D1', '学员姓名')
-                    ->setCellValue('E1', '班级')
-                    ->setCellValue('F1', '答题用时')
-                    ->setCellValue('G1', '交卷时间')
-                    ->setCellValue('H1', '得分')
-                    ->setCellValue('I1', '正确率')
-                    ->setCellValue('J1', '共做题')
-                    ->setCellValue('K1', '答对题数');
-
-            //设置F列水平居中
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('A')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('B')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('C')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('D')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('E')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('F')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('G')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('H')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('I')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('J')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getStyle('K')->getAlignment()
-                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-
-            //设置单元格宽度
-            $objPHPExcel->setActiveSheetIndex($sheet2)->getColumnDimension('E')->setWidth(15);
-            //5.循环刚取出来的数组，将数据逐一添加到excel表格。
-            for($i=0;$i<count($paper_list);$i++){
-                $objPHPExcel->getActiveSheet()->setCellValue('A'.($i+2),$i+1);// 序号
-                $objPHPExcel->getActiveSheet()->setCellValue('B'.($i+2),$paper_list[$i]['subject_class_name']);
-                $objPHPExcel->getActiveSheet()->setCellValue('C'.($i+2),$paper_list[$i]['sub_id'] ? count(json_decode($paper_list[$i]['sub_id'], true)) : 0);
-                $objPHPExcel->getActiveSheet()->setCellValue('D'.($i+2),$paper_list[$i]['real_name']);
-                $objPHPExcel->getActiveSheet()->setCellValue('E'.($i+2),$paper_list[$i]['mc_name']);
-                $objPHPExcel->getActiveSheet()->setCellValue('F'.($i+2),time_remainder($paper_list[$i]['time']));
-                $objPHPExcel->getActiveSheet()->setCellValue('G'.($i+2),$paper_list[$i]['create_at']);
-                $objPHPExcel->getActiveSheet()->setCellValue('H'.($i+2),$paper_list[$i]['score']);
-                $objPHPExcel->getActiveSheet()->setCellValue('I'.($i+2),$paper_list[$i]['right_pre'].'%');
-                $objPHPExcel->getActiveSheet()->setCellValue('J'.($i+2),$paper_list[$i]['u_answer'] ? count(json_decode($paper_list[$i]['u_answer'], true)) : 0);
-                $objPHPExcel->getActiveSheet()->setCellValue('K'.($i+2),$paper_list[$i]['right_count']);
-            }
-
-            //7.设置当前激活的sheet表格名称；
-            $objPHPExcel->getActiveSheet()->setTitle('试卷学员成绩');
-            // -- end
+            $sheet_index = 2;
+            $this->exc_papers($sheet_index, $paper_list, $objPHPExcel);
         }
+        // -- sheet 3 -- end
 
         //6.设置保存的Excel表格名称
-        $filename = '试卷统计数据导出-'.date('ymd',time()).'.xlsx';
+        $filename = $subject_class_name.$subject_class_begin_date.'-'.date('Ymd',time()).'.xls';
 
         //8.设置浏览器窗口下载表格
         header("Content-Type: application/force-download");
