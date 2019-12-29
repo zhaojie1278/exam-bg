@@ -123,6 +123,7 @@ class Paper extends Controller
                 foreach($return_subject as $k=>$v){
 
                     $u_answer = json_decode($info['u_answer'],true);
+                    $return_subject[$k]['sub_stem'] = $v['sub_stem'];
                     $return_subject[$k]['answer'] = json_decode($v['answer'],true);
                     $return_subject[$k]['u_answer'] = array_key_exists($v['id'],$u_answer)?$u_answer[$v['id']]:'';;
                     $return_subject[$k]['cname'] = Db::name('XmSubjectClass')->where('id',$v['cid'])->value('name');

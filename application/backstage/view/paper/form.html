@@ -15,10 +15,9 @@
     <thead>
     <tr>
         <th lay-data="{field:'id', width:80, sort: true}">序号</th>
-        <th lay-data="{field:'cname', width:100}">试题分类</th>
-        <th lay-data="{field:'scene', width:200}">情景</th>
+        <th lay-data="{field:'cname', width:100}">试卷</th>
+        <th lay-data="{field:'scene', width:200}">题干</th>
         <th lay-data="{field:'question'}">题目</th>
-        <th lay-data="{field:'image', width:200}">配图</th>
         <th lay-data="{field:'answer'}">选项</th>
         <th lay-data="{field:'check_answer', width:120}">正确答案</th>
         <th lay-data="{field:'u_answer', width:120}">学员答案</th>
@@ -29,9 +28,8 @@
     <tr>
         <td>{$key+1}</td>
         <td>{$vo.cname}</td>
-        <td>{$vo.scene|default='-'}</td>
+        <td>{$vo.sub_stem|default='无'}</td>
         <td>{$vo.id}.{$vo.question}</td>
-        <td><img src="{$vo.image}" height="100px" alt=""></td>
         <td>
             {volist name="vo.answer" id="voo"}
                 <p>{$voo.a}.{$voo.t}</p>

@@ -105,13 +105,47 @@ class Subject extends Controller
             $excel = substr($excel,stripos($excel,'upload'));
 
             $data = $this->initExcel($excel,$this->request->post('cid'),$score);
-            //dump($data);
             if(count($data)){
-                $res = Db::name('XmSubject')->insertAll($data);
-                if($res){
-                    $this->success("导入成功！");
-                }else{
+                Db::startTrans();
+                $is_import_false = false;
+                try{
+                    $res = Db::name('XmSubject')->insertAll($data);
+                    if($res){
+                        // 题干处理
+                        $rs_up_stem = Db::execute("update xm_subject set sub_stem_id=id where cid=:cid",['cid'=>$this->request->post('cid')]);
+                        if ($rs_up_stem) {
+                            $not_empty_subs = Db::name('XmSubject')
+                                ->where('is_deleted',0)
+                                ->where('cid', $this->request->post('cid'))
+                                ->where('sub_stem', '<>', '')
+                                ->select();
+                            $sub_stems = [];
+                            foreach($not_empty_subs as $sub) {
+                                $sub_stem = $sub['sub_stem'];
+                                if (array_key_exists($sub_stem, $sub_stems)) {
+                                    $sub_stem_id = $sub['sub_stem_id'];
+                                    $rs_up_stem = Db::execute("update xm_subject set sub_stem_id=:sub_stem_id where id=:sub_id",['sub_stem_id' => $sub_stems[$sub_stem],'sub_id'=>$sub['id']]);
+                                } else {
+                                    $sub_id = $sub['id'];
+                                    $sub_stems[$sub_stem] = $sub_id;
+                                }
+                            }
+                        }
+                        // 提交事务
+                        Db::commit();
+                    }else{
+                        $is_import_false = true;
+                    }
+                } catch (\Exception $e) {
+                    // dump($e->getMessage());
+                    // 回滚事务
+                    Db::rollback();
+                    $is_import_false = true;
+                }
+                if ($is_import_false == true) {
                     $this->error("导入失败！");
+                } else {
+                    $this->success("导入成功！");
                 }
             }else{
                 $this->error("解析数据失败！");
@@ -279,34 +313,26 @@ class Subject extends Controller
             foreach($data as $k=>$v){
                 $tmp = [];
                 $tmp['cid'] =  $cid;
-                if (empty($v['A'])) {
+
+                // 题干
+                $tmp['sub_stem'] = $v['A'] ? $v['A'] : ''; // 题干
+
+                if (empty($v['B'])) {
                     // 没有试题
                     continue;
                 }
 
                 // 题目
-                $tmp['question'] =  preg_replace("/^[0-9]+[.]/",'', $v['A']);
+                $tmp['question'] =  preg_replace("/^[0-9]+[.]/",'', $v['B']);
 
                 // 正确答案
-                $tmp['check_answer'] =  $v['G'];
+                $tmp['check_answer'] =  $v['H'];
 
                 $tmp['answer'] = [];
-                if (!empty($v['B'])) {
-                    $tmp_ans = [];
-                    $tmp_ans['a'] = 'A';
-                    if($v['G'] == 'A'){
-                        $tmp_ans['c'] = true;
-                    }else{
-                        $tmp_ans['c'] = false;
-                    }
-                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['B']);
-                    $tmp['answer'][] =  $tmp_ans;
-                }
-
                 if (!empty($v['C'])) {
                     $tmp_ans = [];
-                    $tmp_ans['a'] = 'B';
-                    if($v['G'] == 'B'){
+                    $tmp_ans['a'] = 'A';
+                    if($v['H'] == 'A'){
                         $tmp_ans['c'] = true;
                     }else{
                         $tmp_ans['c'] = false;
@@ -317,8 +343,8 @@ class Subject extends Controller
 
                 if (!empty($v['D'])) {
                     $tmp_ans = [];
-                    $tmp_ans['a'] = 'C';
-                    if($v['G'] == 'C'){
+                    $tmp_ans['a'] = 'B';
+                    if($v['H'] == 'B'){
                         $tmp_ans['c'] = true;
                     }else{
                         $tmp_ans['c'] = false;
@@ -329,8 +355,8 @@ class Subject extends Controller
 
                 if (!empty($v['E'])) {
                     $tmp_ans = [];
-                    $tmp_ans['a'] = 'D';
-                    if($v['G'] == 'D'){
+                    $tmp_ans['a'] = 'C';
+                    if($v['H'] == 'C'){
                         $tmp_ans['c'] = true;
                     }else{
                         $tmp_ans['c'] = false;
@@ -341,13 +367,25 @@ class Subject extends Controller
 
                 if (!empty($v['F'])) {
                     $tmp_ans = [];
-                    $tmp_ans['a'] = 'E';
-                    if($v['G'] == 'E'){
+                    $tmp_ans['a'] = 'D';
+                    if($v['H'] == 'D'){
                         $tmp_ans['c'] = true;
                     }else{
                         $tmp_ans['c'] = false;
                     }
                     $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['F']);
+                    $tmp['answer'][] =  $tmp_ans;
+                }
+
+                if (!empty($v['G'])) {
+                    $tmp_ans = [];
+                    $tmp_ans['a'] = 'E';
+                    if($v['H'] == 'E'){
+                        $tmp_ans['c'] = true;
+                    }else{
+                        $tmp_ans['c'] = false;
+                    }
+                    $tmp_ans['t'] = preg_replace("/^[A-Z]+[.]/",'',$v['G']);
                     $tmp['answer'][] =  $tmp_ans;
                 }
 
