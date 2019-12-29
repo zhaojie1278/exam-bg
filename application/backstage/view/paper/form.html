@@ -30,7 +30,7 @@
         <td>{$key+1}</td>
         <td>{$vo.cname}</td>
         <td>{$vo.scene|default='-'}</td>
-        <td>{$vo.question}</td>
+        <td>{$vo.id}.{$vo.question}</td>
         <td><img src="{$vo.image}" height="100px" alt=""></td>
         <td>
             {volist name="vo.answer" id="voo"}

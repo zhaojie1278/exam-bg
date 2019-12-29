@@ -52,7 +52,10 @@ class Paper extends Controller
     {
         $this->title = '考试记录';
         $this->assign('otype',$this->otype);
-        $query = $this->_query($this->table)->like('otype,real_name');
+
+        $this->assign('subject_class',Db::name("XmSubjectClass")->where(['is_deleted' => '0'])->select());
+
+        $query = $this->_query($this->table)->like('otype,real_name')->equal('cid');
         $query->alias('p')
             ->join('xm_member m','m.id = p.uid','LEFT')
             ->join('xm_subject_class sc','sc.id = p.cid','LEFT')
