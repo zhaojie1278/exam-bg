@@ -27,8 +27,8 @@
             </th>
             <th class='text-left nowrap'>ID</th>
             <th class='text-left nowrap'>试卷</th>
-            <!-- <th class='text-left nowrap'>所属章节</th> -->
-            <th class='text-left' width="400">题目</th>
+            <th class='text-left' width="150">题干</th>
+            <th class='text-left' width="300">题目</th>
             <th class='text-left nowrap'>分数</th>
             <!-- <th class='text-left nowrap'>难易程度</th> -->
             <!-- <th class='text-left nowrap'>全站作答</th> -->
@@ -48,10 +48,8 @@
             <td class='text-left nowrap'>
                 {$vo.cname|default='-'}
             </td>
-            <!-- <td class='text-left nowrap'>
-                {$vo.chapter|default='-'}
-            </td> -->
-            <td class='text-left' width="400">
+            <td>{$vo.sub_stem|default='无'}</td>
+            <td class='text-left'>
                 {$vo.question|default='-'}
             </td>
             <td class='text-left nowrap'>
