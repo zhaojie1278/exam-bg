@@ -159,7 +159,7 @@ class Subjectclass extends Controller
             ->alias('ss')
             ->join('xm_subject sub', 'ss.sub_id=sub.id')
             ->join('xm_subject_class subc', 'sub.cid=subc.id')
-            ->field('ss.*,sub.question,sub.answer,subc.name as subject_class_name')
+            ->field('ss.*,sub.question,sub.question,sub.sub_stem,sub.answer,subc.name as subject_class_name')
             ->where('ss.cid', $sub_cid)
             ->where('ss.unright_count', '>', 0)
             ->order('ss.unright_count desc')
@@ -172,7 +172,8 @@ class Subjectclass extends Controller
             //4.设置表格头（即excel表格的第一行）
             $objPHPExcel->setActiveSheetIndex($sheet_index)
                     ->setCellValue('A1', '错题人数')
-                    ->setCellValue('B1', '题目');
+                    ->setCellValue('B1', '题干')
+                    ->setCellValue('C1', '题目');
 
             //设置水平居中、垂直居中
             $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('A')->getAlignment()
@@ -184,13 +185,19 @@ class Subjectclass extends Controller
                         ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('B')->getAlignment()
                         ->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('C')->getAlignment()->setWrapText(TRUE);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('C')->getAlignment()
+                        ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('C')->getAlignment()
+                        ->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
 
             //设置单元格宽度
             $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('A')->setWidth(10);
-            $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(70);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('B')->setWidth(50);
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(60);
 
             // 试题选项及答案
-            $excel_answer_column_tit = ['C','D','E','F','G'];
+            $excel_answer_column_tit = ['D','E','F','G','H'];
             $excel_answer_column_index = 1;
             foreach($excel_answer_column_tit as $ans_col) {
                 $objPHPExcel->setActiveSheetIndex($sheet_index)
@@ -210,11 +217,11 @@ class Subjectclass extends Controller
                 $excel_answer_column_index++;
             }
             $objPHPExcel->setActiveSheetIndex($sheet_index)
-                        ->setCellValue('H1', '正确答案');
+                        ->setCellValue('I1', '正确答案');
             // 水平、垂直居中
-            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('H')->getAlignment()
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('I')->getAlignment()
                     ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('H')->getAlignment()
+            $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('I')->getAlignment()
                     ->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
             // --
 
@@ -222,7 +229,8 @@ class Subjectclass extends Controller
             $list_count = count($wrong_subs);
             for($i=0;$i<$list_count;$i++){
                 $objPHPExcel->getActiveSheet()->setCellValue('A'.($i+2),$wrong_subs[$i]['unright_count']);
-                $objPHPExcel->getActiveSheet()->setCellValue('B'.($i+2),$wrong_subs[$i]['sub_id'].'.'.$wrong_subs[$i]['question']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B'.($i+2),$wrong_subs[$i]['sub_stem']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.($i+2),$wrong_subs[$i]['sub_id'].'.'.$wrong_subs[$i]['question']);
 
                 $sub_answers = $wrong_subs[$i]['answer'] ? json_decode($wrong_subs[$i]['answer'],true) : '';
                 if ($sub_answers) {
@@ -244,14 +252,14 @@ class Subjectclass extends Controller
 
                     if ($ans_true) {
                         // 正确答案
-                        $objPHPExcel->getActiveSheet()->setCellValue('H'.($i+2),$ans_true);
+                        $objPHPExcel->getActiveSheet()->setCellValue('I'.($i+2),$ans_true);
                     }
                 } else {
                     // 空答案
                     foreach($excel_answer_column_tit as $ans_col) {
                         $objPHPExcel->getActiveSheet()->setCellValue($ans_col.($i+2), '');
                     }                    
-                    $objPHPExcel->getActiveSheet()->setCellValue('H'.($i+2), '');
+                    $objPHPExcel->getActiveSheet()->setCellValue('I'.($i+2), '');
                 }
             }
 
