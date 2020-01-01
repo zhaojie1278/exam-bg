@@ -66,7 +66,7 @@ class Subjectclass extends Controller
             ->join('xm_subject s', 's.cid=c.id')
             ->field('c.*,avg(p.score) as avg_score,count(distinct s.id) as subject_count,count(distinct p.uid) as member_count, avg(p.right_pre) as avg_right_pre')
             ->group('c.id')
-            ->where(['c.id' => $sub_cid])->select();
+            ->where(['c.id' => $sub_cid, 's.is_deleted' => 0])->select();
             return $list;
     }
 
@@ -279,7 +279,7 @@ class Subjectclass extends Controller
         if ($count == 0) {
             // 整合数据：题目错题人数、题目标注人数、题目已做人数
 
-            $all_subs = Db::name("XmSubject")->where(['cid' => $sub_cid])->order('id')->select();
+            $all_subs = Db::name("XmSubject")->where(['cid' => $sub_cid, 'is_deleted' => '0'])->order('id')->select();
 
             $sub_statised = [];
 
