@@ -322,6 +322,13 @@ class Subject extends Controller
                     continue;
                 }
 
+                // 题目序号
+                $tmp['sub_order_no'] = stristr($v['B'], '.', true);
+                if (empty($tmp['sub_order_no'])) {
+                    $returnData = array();
+                    break;
+                }
+
                 // 题目
                 $tmp['question'] =  preg_replace("/^[0-9]+[.]/",'', $v['B']);
 

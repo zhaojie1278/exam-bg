@@ -159,7 +159,7 @@ class Subjectclass extends Controller
             ->alias('ss')
             ->join('xm_subject sub', 'ss.sub_id=sub.id')
             ->join('xm_subject_class subc', 'sub.cid=subc.id')
-            ->field('ss.*,sub.question,sub.question,sub.sub_stem,sub.answer,subc.name as subject_class_name')
+            ->field('ss.*,sub.question,sub.question,sub.sub_stem,sub.answer,sub.sub_order_no,subc.name as subject_class_name')
             ->where('ss.cid', $sub_cid)
             ->where('ss.unright_count', '>', 0)
             ->order('ss.unright_count desc')
@@ -230,7 +230,7 @@ class Subjectclass extends Controller
             for($i=0;$i<$list_count;$i++){
                 $objPHPExcel->getActiveSheet()->setCellValue('A'.($i+2),$wrong_subs[$i]['unright_count']);
                 $objPHPExcel->getActiveSheet()->setCellValue('B'.($i+2),$wrong_subs[$i]['sub_stem']);
-                $objPHPExcel->getActiveSheet()->setCellValue('C'.($i+2),$wrong_subs[$i]['sub_id'].'.'.$wrong_subs[$i]['question']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.($i+2),$wrong_subs[$i]['sub_order_no'].'.'.$wrong_subs[$i]['question']);
 
                 $sub_answers = $wrong_subs[$i]['answer'] ? json_decode($wrong_subs[$i]['answer'],true) : '';
                 if ($sub_answers) {

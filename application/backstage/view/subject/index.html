@@ -27,6 +27,7 @@
             </th>
             <th class='text-left nowrap'>ID</th>
             <th class='text-left nowrap'>试卷</th>
+            <th class='text-left nowrap'>题号</th>
             <th class='text-left' width="150">题干</th>
             <th class='text-left' width="300">题目</th>
             <th class='text-left nowrap'>分数</th>
@@ -48,6 +49,7 @@
             <td class='text-left nowrap'>
                 {$vo.cname|default='-'}
             </td>
+            <td>{empty name='vo.sub_order_no'}<span class="color-red">无</span>{else} {$vo.sub_order_no} {/empty}</td>
             <td>{$vo.sub_stem|default='无'}</td>
             <td class='text-left'>
                 {$vo.question|default='-'}
