@@ -290,10 +290,15 @@ class Subject extends Controller
         $allColumn = $currentSheet->getHighestColumn();
         //获取总行数
         $allRow = $currentSheet->getHighestRow();
+
+        // 解决获取不到 AB 这样的列
+        ++$allColumn;
+        ++$allColumn;
+
         //循环获取表中的数据，$currentRow表示当前行，从哪行开始读取数据，索引值从0开始
         for ($currentRow = 1; $currentRow <= $allRow; $currentRow++) {
             //从哪列开始，A表示第一列
-            for ($currentColumn = 'A'; $currentColumn <= $allColumn; $currentColumn++) {
+            for ($currentColumn = 'A'; $currentColumn != $allColumn; $currentColumn++) {
                 //数据坐标
                 $address = $currentColumn . $currentRow;
                 //读取到的数据，保存到数组$arr中

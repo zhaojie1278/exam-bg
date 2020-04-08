@@ -19,6 +19,7 @@ use library\Controller;
 use library\tools\Data;
 use PHPExcel_Reader_Excel2007;
 use think\Db;
+use think\Log;
 
 /**
  * 会员管理
@@ -85,7 +86,6 @@ class Member extends Controller
             $excel = substr($excel,stripos($excel,'upload'));
 
             $data = $this->initExcel($excel,$this->request->post('class_id'));
-            //dump($data);
             if(count($data)){
                 $res = Db::name('XmMember')->insertAll($data);
                 if($res){
@@ -213,14 +213,18 @@ class Member extends Controller
         $allColumn = $currentSheet->getHighestColumn();
         //获取总行数
         $allRow = $currentSheet->getHighestRow();
+
+        // 解决获取不到 AB 这样的列
+        ++$allColumn;
+        ++$allColumn;
+
         //循环获取表中的数据，$currentRow表示当前行，从哪行开始读取数据，索引值从0开始
-        for ($currentRow = 3; $currentRow <= $allRow; $currentRow++) {
+        for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
             //从哪列开始，A表示第一列
-            for ($currentColumn = 'A'; $currentColumn <= $allColumn; $currentColumn++) {
+            for ($currentColumn = 'A'; $currentColumn != $allColumn; $currentColumn++) {
                 //数据坐标
                 $address = $currentColumn . $currentRow;
                 //读取到的数据，保存到数组$arr中
-
                 $value = $currentSheet->getCell($address)->getValue();
 
                 if(is_object($value))  $value= $value->__toString();
@@ -229,6 +233,7 @@ class Member extends Controller
             }
         }
 
+        // trace('-------------$data::'.var_export(count($data), true));
 
         $returnData = [];
         if(count($data)){
@@ -244,7 +249,15 @@ class Member extends Controller
                 // 题目
                 $tmp['class_no'] =  trim($v['A']);
                 $tmp['real_name'] =  trim($v['B']);
-                // $tmp['phone'] =  trim($v['B']);
+                $tmp['phone'] =  empty($v['C']) ? '' : trim($v['C']);
+                $tmp['mail'] =  empty($v['D']) ? '' : trim($v['D']);
+                if ($tmp['mail'] && stripos($tmp['mail'], '@') == 0) {
+                    // trace('-------------$data::'.var_export($tmp['mail'], true));
+                    // 邮箱不正确
+                    trace('-------------'.$tmp['class_no'].': 邮箱不正确::'.var_export($tmp['mail'], true));
+                    $returnData = [];
+                    break;
+                }
 
                 $tmp['create_at'] = date("Y-m-d H:i:s");
 
