@@ -102,6 +102,18 @@ class Paper extends Controller
         $this->_form($this->table, 'form');
     }
 
+    /**
+     * 删除
+     * @auth true
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function remove()
+    {
+        $this->applyCsrfToken();
+        $this->_delete($this->table);
+    }
+
 
     /**
      * 表单数据处理

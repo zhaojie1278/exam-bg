@@ -18,6 +18,7 @@
             <th class='text-left nowrap'>得分</th>
             <th class='text-left nowrap'>答题时间</th>
             <th class='text-left nowrap'>考试时间</th>
+            <th>操作</th>
             <th></th>
         </tr>
         </thead>
@@ -57,6 +58,11 @@
             <td class='text-left nowrap'>
                 {if auth("edit")}
                 <a class="layui-btn layui-btn-sm" data-title="信息" data-open='{:url("edit")}?id={$vo.id}'>详 情</a>
+                {/if}
+            </td>
+            <td class='text-left nowrap'>
+                {if auth("remove")}
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要删除 [ {$vo.real_name|default='未知？'} - {$vo.subject_class_name|default='未知？'} ] 的考试记录吗？" data-action="{:url('remove')}" data-value="id#{$vo.id}" data-csrf="{:systoken('remove')}">删 除</a>
                 {/if}
             </td>
         </tr>
