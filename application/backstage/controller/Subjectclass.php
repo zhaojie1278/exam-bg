@@ -107,7 +107,8 @@ class Subjectclass extends Controller
                         ->setCellValue('B1', '学号')
                         ->setCellValue('C1', '姓名')
                         ->setCellValue('D1', '得分')
-                        ->setCellValue('E1', '交卷时间');
+                        ->setCellValue('E1', '交卷时间')
+                        ->setCellValue('F1', '答题时长');
 
                 //设置F列水平居中
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('A')->getAlignment()
@@ -120,6 +121,8 @@ class Subjectclass extends Controller
                             ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('E')->getAlignment()
                             ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getStyle('F')->getAlignment()
+                            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
                 //设置单元格宽度
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('A')->setWidth(17);
@@ -127,6 +130,7 @@ class Subjectclass extends Controller
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(15);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('D')->setWidth(10);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('E')->setWidth(20);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('F')->setWidth(10);
                 //7.设置当前激活的sheet表格名称；
                 $objPHPExcel->getActiveSheet()->setTitle($paper_list[$i]['mc_name'].'-成绩');
                 $sheet_index++;
@@ -137,6 +141,7 @@ class Subjectclass extends Controller
             $objPHPExcel->getActiveSheet()->setCellValue('C'.($paper_excel_row_index),$paper_list[$i]['real_name']);
             $objPHPExcel->getActiveSheet()->setCellValue('D'.($paper_excel_row_index),$paper_list[$i]['score']);
             $objPHPExcel->getActiveSheet()->setCellValue('E'.($paper_excel_row_index),$paper_list[$i]['create_at']);
+            $objPHPExcel->getActiveSheet()->setCellValue('F'.($paper_excel_row_index),time_remainder($paper_list[$i]['time']));
             $paper_excel_row_index++;
         }
         // -- end
@@ -588,13 +593,13 @@ class Subjectclass extends Controller
         if ($this->request->isPost()) {
 
             $sub_class_date = input('post.subject_class_date');
-            $sub_class_time = input('post.subject_class_time');
+            // $sub_class_time = input('post.subject_class_time');
             $begin_time = 0;
             $end_time = 0;
-            if (!empty($sub_class_date) && !empty($sub_class_time)) {
-                $sub_class_times = explode(' - ', $sub_class_time);
-                $begin_time = strtotime($sub_class_date.' '.trim($sub_class_times[0]));
-                $end_time = strtotime($sub_class_date.' '.trim($sub_class_times[1]));
+            if (!empty($sub_class_date)) {
+                $sub_class_times = explode(' - ', $sub_class_date);
+                $begin_time = strtotime(trim($sub_class_times[0]));
+                $end_time = strtotime(trim($sub_class_times[1]));
                 if ($begin_time >= $end_time) {
                     $this->error("考试结束时间需大于开始时间！");
                 }

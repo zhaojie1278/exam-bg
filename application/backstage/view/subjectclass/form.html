@@ -23,16 +23,16 @@
         </div> -->
         <div class="layui-form-item">
             <label class="relative block">
-                <span class="color-green">考试日期</span>
-                <input id="subject_class_date" data-date-input='date' required name="subject_class_date" value="{notempty name="vo.begin_time"}{:date('Y-m-d', $vo.begin_time)}{/notempty}" placeholder="请选择考试日期" class="layui-input">
+                <span class="color-green">考试时间</span>
+                <input id="subject_class_date" data-date-input='datetime' required name="subject_class_date" value="{notempty name="vo.begin_time"}{:date('Y-m-d H:i:s', $vo.begin_time)} - {:date('Y-m-d H:i:s', $vo.end_time)}{/notempty}" placeholder="请选择考试日期" class="layui-input">
             </label>
         </div>
-        <div class="layui-form-item">
+        <!-- <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green">考试时间</span>
                 <input id="subject_class_time" data-date-input='datetime' required name="subject_class_time" value="{notempty name="vo.end_time"}{:date('H:i:s', $vo.begin_time)} - {:date('H:i:s', $vo.end_time)}{/notempty}" placeholder="请选择考试时间" class="layui-input">
             </label>
-        </div>
+        </div> -->
         <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green">题目顺序打乱</span>
@@ -85,5 +85,5 @@
         });
     })
     window.form.render();
-    laydate.render({range: true, elem: '[name="subject_class_time"]', type: 'time'})
+    laydate.render({range: true, elem: '[name="subject_class_date"]', type: 'datetime'})
 </script>

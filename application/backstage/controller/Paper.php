@@ -53,13 +53,15 @@ class Paper extends Controller
         $this->title = '考试记录';
         $this->assign('otype',$this->otype);
 
-        $this->assign('subject_class',Db::name("XmSubjectClass")->where(['is_deleted' => '0'])->select());
-
-        $query = $this->_query($this->table)->like('otype,real_name')->equal('cid');
+        $this->assign('subject_class',Db::name("XmSubjectClass")->where(['is_deleted' => '0'])->order('id desc')->select());
+        $this->assign('member_class',Db::name("XmMemberClass")->where(['is_deleted' => '0'])->order('id desc')->select());
+        $query = $this->_query($this->table)->like('otype,real_name')->equal('cid,m.class_id#mc_id');
         $query->alias('p')
             ->join('xm_member m','m.id = p.uid','LEFT')
             ->join('xm_subject_class sc','sc.id = p.cid','LEFT')
-            ->dateBetween('p.create_at#create_at')->order('p.id')->field('m.real_name,m.class_no,p.*,sc.name as subject_class_name')->page();
+            ->dateBetween('p.create_at#create_at')
+            ->order('p.id')
+            ->field('m.real_name,m.class_no,p.*,sc.name as subject_class_name')->page();
 
     }
 
