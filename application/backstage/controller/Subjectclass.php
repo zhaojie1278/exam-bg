@@ -130,7 +130,7 @@ class Subjectclass extends Controller
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('C')->setWidth(15);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('D')->setWidth(10);
                 $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('E')->setWidth(20);
-                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('F')->setWidth(10);
+                $objPHPExcel->setActiveSheetIndex($sheet_index)->getColumnDimension('F')->setWidth(20);
                 //7.设置当前激活的sheet表格名称；
                 $objPHPExcel->getActiveSheet()->setTitle($paper_list[$i]['mc_name'].'-成绩');
                 $sheet_index++;
