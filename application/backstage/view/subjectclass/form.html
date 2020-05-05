@@ -7,32 +7,12 @@
                 <input name="name" value='{$vo.name|default=""}' required pattern="^.{2,}$" placeholder="请输入试卷名称" class="layui-input">
             </label>
         </div>
-        <!-- <div class="layui-form-item">
-            <label class="relative block">
-                <span class="color-green">选择科目</span>
-                <select class="layui-select" required name="cate_id" id="">
-                    {foreach $category as $key=>$item}
-                    {if isset($vo.cate_id) and $vo.cate_id eq $key}
-                    <option selected value="{$key}">{$item}</option>
-                    {else}
-                    <option value="{$key}">{$item}</option>
-                    {/if}
-                    {/foreach}
-                </select>
-            </label>
-        </div> -->
         <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green">考试时间</span>
                 <input id="subject_class_date" data-date-input='datetime' required name="subject_class_date" value="{notempty name="vo.begin_time"}{:date('Y-m-d H:i:s', $vo.begin_time)} - {:date('Y-m-d H:i:s', $vo.end_time)}{/notempty}" placeholder="请选择考试日期" class="layui-input">
             </label>
         </div>
-        <!-- <div class="layui-form-item">
-            <label class="relative block">
-                <span class="color-green">考试时间</span>
-                <input id="subject_class_time" data-date-input='datetime' required name="subject_class_time" value="{notempty name="vo.end_time"}{:date('H:i:s', $vo.begin_time)} - {:date('H:i:s', $vo.end_time)}{/notempty}" placeholder="请选择考试时间" class="layui-input">
-            </label>
-        </div> -->
         <div class="layui-form-item">
             <label class="relative block">
                 <span class="color-green">题目顺序打乱</span>
@@ -53,6 +33,26 @@
                     <input type="radio" required name="is_open_score_layui" value="0" title="不公布" {empty name="vo.is_open_score"}checked{/empty}>
                     <input type="radio" required name="is_open_score_layui" value="1" title="公布" {notempty name="vo.is_open_score"}{if condition="$vo.is_open_score==1"}checked{/if}{/notempty}>
                 </div>
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">班级</span>
+                <span class="color-desc margin-left-5">如果不分班级，则不要选择指定班级</span>
+                <select  class="layui-select" name="mclass_ids[]" id="" multiple="multiple">
+                    {assign name='mclass_ids' value=':array()' /}
+
+                    {if !empty($vo.member_class)}
+                    {assign name='mclass_ids' value=":explode(',', $vo.member_class)" /}
+                    {/if}
+                    {foreach $member_class as $item}
+                    {if in_array($item.id, $mclass_ids)}
+                    <option selected value="{$item.id}">{$item.name}</option>
+                    {else}
+                    <option value="{$item.id}">{$item.name}</option>
+                    {/if}
+                    {/foreach}
+                </select>
             </label>
         </div>
         <!-- <div class="layui-form-item">
@@ -84,6 +84,18 @@
             $("#subject_class_form").submit();
         });
     })
-    window.form.render();
+    form.render();
     laydate.render({range: true, elem: '[name="subject_class_date"]', type: 'datetime'})
+    
+    // 多选框
+    layui.config({
+            base: '__ROOT__/static/plugs/layui/'
+    }).extend({
+        multiSelect: 'multiSelect'
+    }).use(['multiSelect'],function(){
+        var multiSelect = layui.multiSelect;
+        // 如果异步操作了数据，比如在下拉项追加了一项，使用multiSelect.render(type, filter);type, filter参数跟layui官方的form.render(type, filter)一毛一样，可前往查看
+        multiSelect.render();
+    })
 </script>
+<style type="text/css">.multi dl dd.layui-this{background-color:#fff}</style>

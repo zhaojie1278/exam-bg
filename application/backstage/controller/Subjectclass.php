@@ -141,7 +141,10 @@ class Subjectclass extends Controller
             $objPHPExcel->getActiveSheet()->setCellValue('C'.($paper_excel_row_index),$paper_list[$i]['real_name']);
             $objPHPExcel->getActiveSheet()->setCellValue('D'.($paper_excel_row_index),$paper_list[$i]['score']);
             $objPHPExcel->getActiveSheet()->setCellValue('E'.($paper_excel_row_index),$paper_list[$i]['create_at']);
-            $objPHPExcel->getActiveSheet()->setCellValue('F'.($paper_excel_row_index),time_remainder($paper_list[$i]['time']));
+
+            // 答题时长
+            $paper_time = $paper_list[$i]['time'];
+            $objPHPExcel->getActiveSheet()->setCellValue('F'.($paper_excel_row_index),time_remainder($paper_time));
             $paper_excel_row_index++;
         }
         // -- end
@@ -431,6 +434,10 @@ class Subjectclass extends Controller
             if ($list[0]['end_time'] > time()) {
                 $this->error('考试尚未结束，暂无法导出');
             }
+
+            // 查看不认真作业的同学，进行规则冻结
+            // 1、答题未满30分钟交卷2次
+            
             $this->success('正在创建导出请求，请不要关闭浏览器', url('exportpaperstatis', ['id' => $subject_class_id]));
             // $this->success('正在创建导出请求，请不要关闭浏览器', ['wait' => 100000], 1);
         }
@@ -446,11 +453,6 @@ class Subjectclass extends Controller
 
         //1.从数据库中取出数据
         $subclass_list = $this->sub_class_statis($subject_class_id);
-        // dump($subclass_list);
-        // dump(count($subclass_list));
-        if (empty($subclass_list) || count($subclass_list) == 0) {
-            $this->error('当前试卷无考试统计数据');
-        }
         $paper_list = $this->paper_statis($subject_class_id);
         if (empty($paper_list) || count($paper_list) == 0) {
             $this->error('当前试卷无考试学员数据');
@@ -591,7 +593,12 @@ class Subjectclass extends Controller
     public function _form_filter(&$data)
     {
         if ($this->request->isPost()) {
-
+            $member_class = input('post.mclass_ids/a');
+            if (empty($member_class)) {
+                $member_class = '';
+            } else {
+                $member_class = implode(',', $member_class);
+            }
             $sub_class_date = input('post.subject_class_date');
             // $sub_class_time = input('post.subject_class_time');
             $begin_time = 0;
@@ -607,7 +614,11 @@ class Subjectclass extends Controller
            $data['begin_time'] = $begin_time;
            $data['end_time'] = $end_time;
            $data['create_at'] = date('Y-m-d H:i:s');
+           $data['member_class'] = $member_class;
 
+        } elseif ($this->request->isGet()) {
+            $member_class = Db::name('XmMemberClass')->where('is_deleted',0)->order('id desc')->select();
+            $this->member_class = $member_class;
         }
     }
 
@@ -638,4 +649,40 @@ class Subjectclass extends Controller
         $this->_delete($this->table);
     }
 
+    /**
+     * 清空考试记录
+     * @auth true
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function emptypapers()
+    {
+        $this->applyCsrfToken();
+        $cid = $this->request->post('id');
+        $where_c = ['id' => $cid];
+        $xm_subject_c = Db::name('XmSubjectClass')->where($where_c)->find();
+        if ($xm_subject_c['is_deleted'] !== 0) {
+            $this->error('当前试卷不存在，请刷新试卷列表后操作');
+        }
+
+        if ($xm_subject_c['end_time'] > time()) {
+            $this->error('当前试卷考试时间未到，不可做清空考试记录操作');
+        }
+        // trace('----------->'.var_export($xm_subject_c, true));
+
+        $where = ['cid' => $cid];
+        $rs_paper_count = Db::name('XmSubjectPaperSingle')->where($where)->count();
+        if ($rs_paper_count) {
+            $rs_single = Db::name('XmSubjectPaperSingle')->where($where)->delete();
+            $rs_paper = Db::name('XmSubjectPaper')->where($where)->delete();
+            $this->success('已清空考试记录');
+        } else {
+            $this->error('当前试卷无考试数据');
+        }
+    }
+
+    // 30分钟内
+    private function member_lock_paper_time() {
+
+    }
 }

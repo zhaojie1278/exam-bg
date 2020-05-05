@@ -78,6 +78,10 @@
                 {if auth("exportpaperstatisbefore")}
                 <a class="layui-btn layui-btn-sm layui-btn-danger" data-action="{:url('exportpaperstatisbefore', ['id' => $vo.id])}" data-value="id#{$vo.id}" data-csrf="{:systoken('exportpaperstatisbefore')}" data-time="3">导出考试统计</a>
                 {/if}
+
+                {if auth("emptypapers")}
+                <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="<span style='color: #ff0000;'>慎重操作！！！</span>清空考试记录后不可恢复，确定要清空吗？" data-action="{:url('emptypapers', ['id' => $vo.id])}" data-value="id#{$vo.id}" data-csrf="{:systoken('emptypapers')}" data-time="3">清空考试</a>
+                {/if}
             </td>
         </tr>
         {/foreach}

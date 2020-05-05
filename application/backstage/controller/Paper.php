@@ -133,15 +133,15 @@ class Paper extends Controller
 
             if($info){
                 $return_subject =Db::name('XmSubject')->whereIn('id',json_decode($info['sub_id'],true))->select();
-
+                $class_name = Db::name('XmSubjectClass')->where('id',$info['cid'])->value('name');
                 foreach($return_subject as $k=>$v){
 
                     $u_answer = json_decode($info['u_answer'],true);
                     $return_subject[$k]['sub_stem'] = $v['sub_stem'];
                     $return_subject[$k]['answer'] = json_decode($v['answer'],true);
-                    $return_subject[$k]['u_answer'] = array_key_exists($v['id'],$u_answer)?$u_answer[$v['id']]:'';;
-                    $return_subject[$k]['cname'] = Db::name('XmSubjectClass')->where('id',$v['cid'])->value('name');
-                    $return_subject[$k]['is_collect'] = Db::name('XmSubjectCollect')->where('uid',$info['uid'])->where('subject_id',$v['id'])->count();
+                    $return_subject[$k]['u_answer'] = array_key_exists($v['id'],$u_answer)?$u_answer[$v['id']]:'';
+                    $return_subject[$k]['cname'] = $class_name;
+                    // $return_subject[$k]['is_collect'] = Db::name('XmSubjectCollect')->where('uid',$info['uid'])->where('subject_id',$v['id'])->count();
                 }
 
                 $this->assign('subject',$return_subject);
