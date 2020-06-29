@@ -139,6 +139,7 @@ class Subject extends Controller
                 } catch (\Exception $e) {
                     // dump($e->getMessage());
                     // 回滚事务
+                    trace('-----------err:'.var_export($e->getMessage(), true));
                     Db::rollback();
                     $is_import_false = true;
                 }
@@ -310,7 +311,7 @@ class Subject extends Controller
                 $data[$currentRow][$currentColumn] = $value;
             }
         }
-
+// trace('data::'.var_export($data, true));
 
         $returnData = [];
         if(count($data)){
@@ -412,7 +413,7 @@ class Subject extends Controller
                 }
                 $tmp['create_at'] = date("Y-m-d H:i:s");
                 // $tmp['analysis'] = str_replace("【解析】",'',$v['I']);
-
+trace('------------tmp::'.var_export($tmp, true));
                 $returnData[] = $tmp;
             }
         }
